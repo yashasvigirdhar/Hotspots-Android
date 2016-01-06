@@ -42,6 +42,10 @@ public class Place implements Parcelable {
         this.zomatoUrl = zomatoUrl;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
     public String getCity() {
         return city;
     }

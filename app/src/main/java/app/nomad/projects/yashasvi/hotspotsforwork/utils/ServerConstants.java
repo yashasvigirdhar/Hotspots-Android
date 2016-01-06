@@ -7,4 +7,5 @@ public class ServerConstants {
 
     public static final String SERVER_URL_APP_FEEDBACK = "http://192.168.0.126:8080/findplace/feedbackapp/";
     public static final String SERVER_IMAGES_URL = "http://192.168.0.126:8080/findplace/images/";
+    public static final String SERVER_GET_IMAGES_URL = "http://192.168.0.126:8080/findplace/api/images/";
 }

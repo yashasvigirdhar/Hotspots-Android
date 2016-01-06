@@ -12,11 +12,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -26,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
+import app.nomad.projects.yashasvi.hotspotsforwork.models.PlaceImages;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 
 public class PlaceActivity extends AppCompatActivity {
@@ -52,10 +56,11 @@ public class PlaceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.place_detailed_view);
         place = (Place) getIntent().getExtras().getParcelable("place");
-        DownloadImageBitmaps();
         initialize();
-        if (place != null)
+
+        if (place != null) {
             populate();
+        }
     }
 
     private void DownloadImageBitmaps() {
@@ -72,6 +77,8 @@ public class PlaceActivity extends AppCompatActivity {
         tvDescription.setText(place.getDescription());
         tvWifiPaid.append(place.getWifiPaid());
         tvChargingPoints.append(place.getChargingPoints());
+
+        DownloadImageBitmaps();
     }
 
     private void initialize() {
@@ -86,6 +93,7 @@ public class PlaceActivity extends AppCompatActivity {
         tvChargingPoints = (TextView) findViewById(R.id.tvChargingPoints);
 
         llGallery = (LinearLayout) findViewById(R.id.llGallery);
+
     }
 
 
@@ -130,37 +138,55 @@ public class PlaceActivity extends AppCompatActivity {
         return imageBitmap;
     }
 
-    public class downloadImageAsyncTask extends AsyncTask<Void, Bitmap, List<Bitmap>> {
+    public class downloadImageAsyncTask extends AsyncTask<Void, Bitmap, Void> {
 
-        List<URL> urls;
-
+        List<URL> imageUrls;
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            urls = new ArrayList<>();
-            String path;
-            for (int i = 1; i <= imagesCount; i++) {
-                try {
-                    path = ServerConstants.SERVER_IMAGES_URL + place.getName() + i + ".png";
-                    Log.i(TAG, path);
-                    path = path.replace(" ", "%20");
-                    urls.add(new URL(path));
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
+        protected Void doInBackground(Void... params) {
+            PlaceImages placeImages = null;
+            HttpURLConnection connection = null;
+            try {
+                //get PlaceImages object
+                URL u = new URL(ServerConstants.SERVER_GET_IMAGES_URL + place.getId());
+                connection = (HttpURLConnection) u.openConnection();
+                connection.connect();
+                int status = connection.getResponseCode();
+                Log.i(TAG, "status : " + status);
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line + "\n");
                 }
-            }
-        }
+                br.close();
 
-        @Override
-        protected List<Bitmap> doInBackground(Void... params) {
-            List<Bitmap> bitmaps = new ArrayList<>();
-            for (int i = 0; i < urls.size(); i++) {
-                Bitmap bt = download(urls.get(i));
-                publishProgress(bt);
-                bitmaps.add(bt);
+                placeImages = new Gson().fromJson(sb.toString(), PlaceImages.class);
+                Log.i(TAG, placeImages.toString());
+
+                //form urls
+                imageUrls = new ArrayList<>();
+                String path;
+                for (int i = 1; i <= placeImages.getCount(); i++) {
+                    path = placeImages.getPath() + "/" + place.getName() + i + ".png";
+                    path = path.replace(" ", "%20");
+                    Log.i(TAG, path);
+                    imageUrls.add(new URL(path));
+                }
+
+                //download images
+                for (int i = 0; i < imageUrls.size(); i++) {
+                    Bitmap bt = download(imageUrls.get(i));
+                    publishProgress(bt);
+                }
+                
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            return bitmaps;
+            return null;
         }
 
         @Override
@@ -169,26 +195,12 @@ public class PlaceActivity extends AppCompatActivity {
             llGallery.addView(getImageViewFromBitmap(bitmaps[0]));
         }
 
-        @Override
-        protected void onPostExecute(List<Bitmap> imageBitmaps) {
-            super.onPostExecute(imageBitmaps);
-            Toast.makeText(getBaseContext(), "bitmaps received", Toast.LENGTH_SHORT).show();
-            //fillGallery(imageBitmaps);
-        }
-    }
-
-    private void fillGallery(List<Bitmap> imageBitmaps) {
-
-        for (int i = 0; i < imagesCount; i++) {
-            llGallery.addView(getImageViewFromBitmap(imageBitmaps.get(i)));
-        }
-
     }
 
     private View getImageViewFromBitmap(Bitmap bitmap) {
         LinearLayout layout = new LinearLayout(getApplicationContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        params.setMargins(5,5,5,5);
+        params.setMargins(5, 5, 5, 5);
         layout.setLayoutParams(params);
         layout.setGravity(Gravity.CENTER);
 

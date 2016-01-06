@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="databaseManager">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/app/libs/databaseManager.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
