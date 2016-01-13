@@ -37,7 +37,7 @@
 
             <LinearLayout
                 android:id="@+id/llGallery"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="horizontal" />
         </HorizontalScrollView>
@@ -47,8 +47,7 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        >
+        android:layout_weight="1">
 
         <TableRow
             android:layout_width="match_parent"
@@ -130,13 +129,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:padding="5dip"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="5dip">
 
         <ScrollView
             android:id="@+id/svDescription"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/tvDescription"

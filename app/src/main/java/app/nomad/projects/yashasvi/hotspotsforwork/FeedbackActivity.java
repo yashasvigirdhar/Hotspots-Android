@@ -63,7 +63,7 @@ public class FeedbackActivity extends AppCompatActivity {
     public String postJSON(String jsonData) {
         HttpURLConnection connection = null;
         try {
-            URL u = new URL(ServerConstants.SERVER_URL_APP_FEEDBACK);
+            URL u = new URL(ServerConstants.APP_FEEDBACK_PATH);
             connection = (HttpURLConnection) u.openConnection();
             connection.setDoInput(true);
             connection.setDoOutput(true);

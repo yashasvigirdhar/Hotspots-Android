@@ -11,15 +11,26 @@
     tools:context=".MainActivity"
     android:weightSum="1">
 
+    <LinearLayout
+        android:id="@+id/container_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar" />
+    </LinearLayout>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="New Button"
         android:id="@+id/bGetPlacesFromServer" />
 
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="321dp"
-        android:id="@+id/listPlaces"
-        android:layout_weight="0.55" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"/>
 </LinearLayout>

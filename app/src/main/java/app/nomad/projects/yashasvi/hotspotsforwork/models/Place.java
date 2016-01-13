@@ -10,10 +10,13 @@ public class Place implements Parcelable {
     Integer id;
 
     String name;
+    String address;
     String city;
     String latitude;
     String longitude;
     String phone;
+    String rating;
+    String cost;
     String food;
     String wifiSpeed;
     String wifiPaid;
@@ -23,15 +26,18 @@ public class Place implements Parcelable {
     String description;
     String zomatoUrl;
 
-    public Place(Integer id, String name, String city, String latitude, String longitude, String phoneNumber,
-                 String wifispeed, String wifipaid, String service, String ambiance, String food, String charingpoints,
+    public Place(Integer id, String name, String address, String city, String latitude, String longitude, String phoneNumber,
+                 String rating, String cost, String wifispeed, String wifipaid, String service, String ambiance, String food, String charingpoints,
                  String description, String zomatoUrl) {
         this.id = id;
+        this.address = address;
         this.city = city;
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.phone = phoneNumber;
+        this.rating = rating;
+        this.cost = cost;
         this.food = food;
         this.wifiSpeed = wifispeed;
         this.wifiPaid = wifipaid;
@@ -42,8 +48,33 @@ public class Place implements Parcelable {
         this.zomatoUrl = zomatoUrl;
     }
 
+
     public Integer getId() {
         return id;
+    }
+
+    public String getCost() {
+        return cost;
+    }
+
+    public void setCost(String cost) {
+        this.cost = cost;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
     }
 
     public String getCity() {

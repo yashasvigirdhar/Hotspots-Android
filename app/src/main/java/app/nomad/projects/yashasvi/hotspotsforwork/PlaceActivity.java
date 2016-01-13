@@ -6,9 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -70,13 +68,15 @@ public class PlaceActivity extends AppCompatActivity {
     private void populate() {
         tvName.setText(place.getName());
 
-        tvWifiSpeed.append(String.valueOf(place.getWifiSpeed()));
         tvAmbiance.append(String.valueOf(place.getAmbiance()));
         tvFood.append(String.valueOf(place.getFood()));
         tvService.append(String.valueOf(place.getService()));
-        tvDescription.setText(place.getDescription());
-        tvWifiPaid.append(place.getWifiPaid());
         tvChargingPoints.append(place.getChargingPoints());
+        tvWifiSpeed.append(String.valueOf(place.getWifiSpeed()));
+        tvWifiPaid.append(place.getWifiPaid());
+
+
+        tvDescription.setText(place.getDescription());
 
         DownloadImageBitmaps();
     }
@@ -148,7 +148,7 @@ public class PlaceActivity extends AppCompatActivity {
             HttpURLConnection connection = null;
             try {
                 //get PlaceImages object
-                URL u = new URL(ServerConstants.SERVER_GET_IMAGES_URL + place.getId());
+                URL u = new URL(ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.IMAGES_PATH + place.getId());
                 connection = (HttpURLConnection) u.openConnection();
                 connection.connect();
                 int status = connection.getResponseCode();
@@ -169,7 +169,7 @@ public class PlaceActivity extends AppCompatActivity {
                 imageUrls = new ArrayList<>();
                 String path;
                 for (int i = 1; i <= placeImages.getCount(); i++) {
-                    path = placeImages.getPath() + "/" + place.getName() + i + ".png";
+                    path = placeImages.getPath() + place.getName() + i + ".png";
                     path = path.replace(" ", "%20");
                     Log.i(TAG, path);
                     imageUrls.add(new URL(path));
@@ -180,7 +180,7 @@ public class PlaceActivity extends AppCompatActivity {
                     Bitmap bt = download(imageUrls.get(i));
                     publishProgress(bt);
                 }
-                
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -199,17 +199,18 @@ public class PlaceActivity extends AppCompatActivity {
 
     private View getImageViewFromBitmap(Bitmap bitmap) {
         LinearLayout layout = new LinearLayout(getApplicationContext());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(5, 5, 5, 5);
         layout.setLayoutParams(params);
-        layout.setGravity(Gravity.CENTER);
 
-        ImageView imageView = new ImageView(getApplicationContext());
-        imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        ImageView imageView = new ImageView(this);
+        //imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+        //imageView.setMaxHeight(llGallery.getHeight());
+        imageView.setPadding(2, 2, 2, 2);
         imageView.setImageBitmap(bitmap);
-        layout.addView(imageView);
-        return layout;
+        //layout.addView(imageView);
+        return imageView;
 
     }
 
