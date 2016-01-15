@@ -1,4 +1,4 @@
-package app.nomad.projects.yashasvi.hotspotsforwork;
+package app.nomad.projects.yashasvi.hotspotsforwork.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,9 +14,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -30,21 +27,21 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import app.nomad.projects.yashasvi.hotspotsforwork.adapters.MyRecyclerViewAdapter;
+import app.nomad.projects.yashasvi.hotspotsforwork.R;
+import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlacesRecyclerViewAdapter;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class PlacesListActivity extends AppCompatActivity implements  PlacesRecyclerViewAdapter.MyClickListener{
 
-    final public static String LOG_TAG = "MainActivity";
+    final public static String LOG_TAG = "PlacesListActivity";
 
 
     private Toolbar mToolbar;
-    private Button bGetResults;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private PlacesRecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     ArrayList<Place> places;
@@ -52,8 +49,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_list_places);
         initialize();
+        GetPlacesAsyncTask getPlacesAsyncTask = new GetPlacesAsyncTask(ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + "places");
+        getPlacesAsyncTask.execute();
     }
 
     private void initialize() {
@@ -62,30 +61,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        bGetResults = (Button) findViewById(R.id.bGetPlacesFromServer);
-        places = new ArrayList<Place>();
+        places = new ArrayList<>();
 
-        bGetResults.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TestAsyncTask testAsyncTask = new TestAsyncTask(ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + "places");
-                testAsyncTask.execute();
-            }
-        });
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MyRecyclerViewAdapter(places);
+        mAdapter = new PlacesRecyclerViewAdapter(places);
         mRecyclerView.setAdapter(mAdapter);
-        ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new MyRecyclerViewAdapter
-                .MyClickListener() {
-            @Override
-            public void onItemClick(int position, View v) {
-                Log.i(LOG_TAG, " Clicked on Item " + position);
-            }
-        });
+
+        mAdapter.setOnItemClickListener(this);
+
     }
 
     public String getJSON(String url) {
@@ -129,16 +116,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this, PlaceActivity.class);
-        intent.putExtra("place", places.get(position));
+    public void onItemClick(int position, View v) {
+        Intent intent = new Intent(this,PlaceViewActivity.class);
+        intent.putExtra("place",places.get(position));
         startActivity(intent);
     }
 
-    public class TestAsyncTask extends AsyncTask<Void, Void, String> {
+
+    public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {
+
         private String mUrl;
 
-        public TestAsyncTask(String url) {
+        public GetPlacesAsyncTask(String url) {
             mUrl = url;
         }
 
@@ -162,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }.getType();
             try {
                 places = (ArrayList<Place>) new Gson().fromJson(jsonString, collectionType);
-                mAdapter = new MyRecyclerViewAdapter(places);
+                mAdapter = new PlacesRecyclerViewAdapter(places);
                 mRecyclerView.setAdapter(mAdapter);
                 //displayPlacesAdapter.notifyDataSetChanged();
                 for (int i = 0; i < places.size(); i++)
@@ -183,13 +172,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        if(id == R.id.action_search){
-            Toast.makeText(getApplicationContext(), "Search action is selected!", Toast.LENGTH_SHORT).show();
-            return true;
+        if (id == R.id.action_feedback) {
+            Intent i = new Intent(this,FeedbackActivity.class);
+            startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);

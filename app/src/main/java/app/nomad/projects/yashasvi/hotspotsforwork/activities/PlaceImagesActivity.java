@@ -1,15 +1,13 @@
-package app.nomad.projects.yashasvi.hotspotsforwork;
+package app.nomad.projects.yashasvi.hotspotsforwork.activities;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -26,79 +24,46 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
+import app.nomad.projects.yashasvi.hotspotsforwork.R;
+import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlaceImagesRecyclerViewAdapter;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.PlaceImages;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 
-public class PlaceActivity extends AppCompatActivity {
+public class PlaceImagesActivity extends AppCompatActivity {
 
-    public static final String TAG = "PlaceActivity";
-    public int imagesCount = 11;
+    private static final String TAG = "PlaceImageActivity";
 
-    TextView tvName;
-    TextView tvAmbiance;
-    TextView tvFood;
-    TextView tvService;
-    TextView tvDescription;
-    TextView tvWifiSpeed;
-    TextView tvWifiPaid;
-    TextView tvChargingPoints;
+    String imagesUrl;
 
-
-    LinearLayout llGallery;
-
-    Place place = null;
+    RecyclerView placeImagesRecyclerView;
+    PlaceImagesRecyclerViewAdapter placeImagesRecyclerViewAdapter;
+    GridLayoutManager placeLayoutGridLayoutManager;
+    List<Bitmap> placeImageBitmaps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.place_detailed_view);
-        place = (Place) getIntent().getExtras().getParcelable("place");
+        setContentView(R.layout.activity_place_images);
         initialize();
-
-        if (place != null) {
-            populate();
-        }
+        new downloadImageAsyncTask(imagesUrl).execute();
     }
 
-    private void DownloadImageBitmaps() {
-        new downloadImageAsyncTask().execute();
+    void initialize(){
+        placeImagesRecyclerView = (RecyclerView) findViewById(R.id.rvPlaceImages);
+
+        placeLayoutGridLayoutManager = new GridLayoutManager(this, 3);
+        placeImagesRecyclerView.setLayoutManager(placeLayoutGridLayoutManager);
+
+        placeImageBitmaps = new ArrayList<>();
+        placeImagesRecyclerViewAdapter = new PlaceImagesRecyclerViewAdapter(placeImageBitmaps);
+        placeImagesRecyclerView.setAdapter(placeImagesRecyclerViewAdapter);
+
+        String place_id = getIntent().getStringExtra("place_id");
+        imagesUrl = ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.IMAGES_PATH + place_id;
     }
-
-    private void populate() {
-        tvName.setText(place.getName());
-
-        tvAmbiance.append(String.valueOf(place.getAmbiance()));
-        tvFood.append(String.valueOf(place.getFood()));
-        tvService.append(String.valueOf(place.getService()));
-        tvChargingPoints.append(place.getChargingPoints());
-        tvWifiSpeed.append(String.valueOf(place.getWifiSpeed()));
-        tvWifiPaid.append(place.getWifiPaid());
-
-
-        tvDescription.setText(place.getDescription());
-
-        DownloadImageBitmaps();
-    }
-
-    private void initialize() {
-        tvName = (TextView) findViewById(R.id.tvName);
-
-        tvWifiSpeed = (TextView) findViewById(R.id.tvWifiSpeed);
-        tvAmbiance = (TextView) findViewById(R.id.tvAmbiance);
-        tvFood = (TextView) findViewById(R.id.tvFood);
-        tvService = (TextView) findViewById(R.id.tvService);
-        tvDescription = (TextView) findViewById(R.id.tvDescription);
-        tvWifiPaid = (TextView) findViewById(R.id.tvWifiPaid);
-        tvChargingPoints = (TextView) findViewById(R.id.tvChargingPoints);
-
-        llGallery = (LinearLayout) findViewById(R.id.llGallery);
-
-    }
-
 
     private Bitmap download(URL u) {
-        System.out.println("Inside Download");
+        System.out.println("Downloading image " + u.toString());
         Bitmap imageBitmap = null;
         try {
 
@@ -108,11 +73,9 @@ public class PlaceActivity extends AppCompatActivity {
             c.connect();
 
             InputStream is = c.getInputStream();
-            Log.i("log_tag", " InputStream consist of : " + is.read());
             imageBitmap = BitmapFactory.decodeStream((InputStream) u.getContent());
 
             Log.i("image activity", "Download Completed Successfully");
-
 
         } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
@@ -140,7 +103,11 @@ public class PlaceActivity extends AppCompatActivity {
 
     public class downloadImageAsyncTask extends AsyncTask<Void, Bitmap, Void> {
 
-        List<URL> imageUrls;
+        String url;
+
+        downloadImageAsyncTask(String url) {
+            this.url = url;
+        }
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -148,7 +115,7 @@ public class PlaceActivity extends AppCompatActivity {
             HttpURLConnection connection = null;
             try {
                 //get PlaceImages object
-                URL u = new URL(ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.IMAGES_PATH + place.getId());
+                URL u = new URL(url);
                 connection = (HttpURLConnection) u.openConnection();
                 connection.connect();
                 int status = connection.getResponseCode();
@@ -163,23 +130,19 @@ public class PlaceActivity extends AppCompatActivity {
                 br.close();
 
                 placeImages = new Gson().fromJson(sb.toString(), PlaceImages.class);
+                //TODO : check here if placeImages is null
                 Log.i(TAG, placeImages.toString());
 
-                //form urls
-                imageUrls = new ArrayList<>();
+
                 String path;
                 for (int i = 1; i <= placeImages.getCount(); i++) {
-                    path = placeImages.getPath() + place.getName() + i + ".png";
+                    path = placeImages.getPath() + "Tea Everyday" + i + ".png";
                     path = path.replace(" ", "%20");
                     Log.i(TAG, path);
-                    imageUrls.add(new URL(path));
-                }
-
-                //download images
-                for (int i = 0; i < imageUrls.size(); i++) {
-                    Bitmap bt = download(imageUrls.get(i));
+                    Bitmap bt = download(new URL(path));
                     publishProgress(bt);
                 }
+
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -192,26 +155,11 @@ public class PlaceActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(Bitmap... bitmaps) {
             super.onProgressUpdate(bitmaps[0]);
-            llGallery.addView(getImageViewFromBitmap(bitmaps[0]));
+            placeImageBitmaps.add(bitmaps[0]);
+            placeImagesRecyclerViewAdapter.notifyDataSetChanged();
         }
 
     }
 
-    private View getImageViewFromBitmap(Bitmap bitmap) {
-        LinearLayout layout = new LinearLayout(getApplicationContext());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(5, 5, 5, 5);
-        layout.setLayoutParams(params);
-
-        ImageView imageView = new ImageView(this);
-        //imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        //imageView.setMaxHeight(llGallery.getHeight());
-        imageView.setPadding(2, 2, 2, 2);
-        imageView.setImageBitmap(bitmap);
-        //layout.addView(imageView);
-        return imageView;
-
-    }
 
 }

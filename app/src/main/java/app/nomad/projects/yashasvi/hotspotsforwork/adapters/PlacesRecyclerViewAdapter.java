@@ -15,7 +15,7 @@ import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 /**
  * Created by ygirdha on 1/9/16.
  */
-public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.DataObjectHolder> {
+public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecyclerViewAdapter.DataObjectHolder> {
 
     private ArrayList<Place> mDataset;
     private static MyClickListener myClickListener;
@@ -23,7 +23,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @Override
     public DataObjectHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.cardview, parent, false);
+                .inflate(R.layout.place_card, parent, false);
 
         DataObjectHolder dataObjectHolder = new DataObjectHolder(view);
         return dataObjectHolder;
@@ -63,7 +63,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         this.myClickListener = myClickListener;
     }
 
-    public MyRecyclerViewAdapter(ArrayList<Place> myDataset) {
+    public PlacesRecyclerViewAdapter(ArrayList<Place> myDataset) {
         mDataset = myDataset;
     }
 
@@ -72,9 +72,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         return mDataset.size();
     }
 
-    public void addItem(Place dataObj, int index) {
-        mDataset.add(index, dataObj);
-        notifyItemInserted(index);
+    public void addItem(Place dataObj) {
+        mDataset.add(dataObj);
+        notifyItemInserted(mDataset.size()-1);
     }
 
     public void deleteItem(int index) {

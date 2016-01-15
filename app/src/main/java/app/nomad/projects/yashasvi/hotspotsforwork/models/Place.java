@@ -192,10 +192,13 @@ public class Place implements Parcelable {
     protected Place(Parcel in) {
         id = in.readByte() == 0x00 ? null : in.readInt();
         name = in.readString();
+        address = in.readString();
         city = in.readString();
         latitude = in.readString();
         longitude = in.readString();
         phone = in.readString();
+        rating = in.readString();
+        cost = in.readString();
         food = in.readString();
         wifiSpeed = in.readString();
         wifiPaid = in.readString();
@@ -220,10 +223,13 @@ public class Place implements Parcelable {
             dest.writeInt(id);
         }
         dest.writeString(name);
+        dest.writeString(address);
         dest.writeString(city);
         dest.writeString(latitude);
         dest.writeString(longitude);
         dest.writeString(phone);
+        dest.writeString(rating);
+        dest.writeString(cost);
         dest.writeString(food);
         dest.writeString(wifiSpeed);
         dest.writeString(wifiPaid);
