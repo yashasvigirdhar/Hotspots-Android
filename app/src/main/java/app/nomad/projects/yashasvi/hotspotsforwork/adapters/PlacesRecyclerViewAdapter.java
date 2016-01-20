@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
@@ -17,8 +18,11 @@ import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
  */
 public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecyclerViewAdapter.DataObjectHolder> {
 
-    private ArrayList<Place> mDataset;
+    private List<Place> mDataset;
+    private List<Place> all_Places;
+
     private static MyClickListener myClickListener;
+    private String data;
 
     @Override
     public DataObjectHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -29,15 +33,34 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         return dataObjectHolder;
     }
 
+
     @Override
     public void onBindViewHolder(DataObjectHolder holder, int position) {
         holder.tvPlaceName.setText(mDataset.get(position).getName());
         String address = mDataset.get(position).getAddress();
         String area = address.substring(address.lastIndexOf(',') + 1) + ", " + mDataset.get(position).getCity();
         holder.tvPlaceArea.setText(area);
-        holder.tvPlaceCost.append(mDataset.get(position).getCost());
+        holder.tvPlaceCost.setText(mDataset.get(position).getCost());
         holder.tvPlaceRating.setText(mDataset.get(position).getRating());
         holder.tvPlaceDistance.setText("7.5km");
+    }
+
+    public String getFilteredData() {
+        String data = "";
+        for (int i = 0; i < mDataset.size(); i++) {
+            data += mDataset.get(i).getName();
+            data += " , ";
+        }
+        return data;
+    }
+
+    public String getOriginalData() {
+        String data = "";
+        for (int i = 0; i < all_Places.size(); i++) {
+            data += all_Places.get(i).getName();
+            data += " , ";
+        }
+        return data;
     }
 
     public static class DataObjectHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -63,8 +86,9 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         this.myClickListener = myClickListener;
     }
 
-    public PlacesRecyclerViewAdapter(ArrayList<Place> myDataset) {
+    public PlacesRecyclerViewAdapter(List<Place> myDataset) {
         mDataset = myDataset;
+        all_Places = myDataset;
     }
 
     @Override
@@ -72,9 +96,9 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         return mDataset.size();
     }
 
-    public void addItem(Place dataObj) {
-        mDataset.add(dataObj);
-        notifyItemInserted(mDataset.size()-1);
+    public void addItem(int position, Place dataObj) {
+        mDataset.add(position, dataObj);
+        notifyItemInserted(position);
     }
 
     public void deleteItem(int index) {
@@ -82,8 +106,31 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         notifyItemRemoved(index);
     }
 
+    public void moveItem(int fromPosition, int toPosition) {
+        final Place place = mDataset.remove(fromPosition);
+        mDataset.add(toPosition, place);
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
     public interface MyClickListener {
         public void onItemClick(int position, View v);
+    }
+
+    public void flushFilter() {
+        mDataset = new ArrayList<>();
+        mDataset.addAll(all_Places);
+        notifyDataSetChanged();
+    }
+
+    public void setFilter(String constraint) {
+
+        mDataset = new ArrayList<>();
+        constraint = constraint.toString().toLowerCase();
+        for (Place item : all_Places) {
+            if (item.getName().toLowerCase().contains(constraint))
+                mDataset.add(item);
+        }
+        notifyDataSetChanged();
     }
 
 }

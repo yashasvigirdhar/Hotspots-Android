@@ -63,45 +63,133 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:padding="5dp">
+                    android:orientation="vertical">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.8"
-                        android:orientation="vertical">
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.3"
+                        android:orientation="horizontal"
+                        android:padding="5dp">
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="5dp"
-                            android:text="ADDRESS"
-                            android:textAllCaps="true"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="5dp"
-                            android:text="411, NS Centre, 7th Block, C Cross, 1st Main, Behind Vodafone Showroom, Koramangala 7th Block" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.2">
-
-                        <android.support.v7.widget.AppCompatImageView
-                            android:id="@+id/tvAddressExtra"
-                            android:layout_width="match_parent"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="match_parent"
-                            android:padding="5dip"
-                            android:src="@mipmap/ic_navigation" />
+                            android:layout_weight="0.8"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvPlacePhonekey"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="5dp"
+                                android:text="PHONE NO"
+                                android:textAllCaps="true"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvPlacePhoneValue"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="5dp"
+                                android:text="8143914414" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.2">
+
+                            <ImageButton
+                                android:id="@+id/ibCallPlace"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="5dp"
+                                android:background="@android:color/transparent"
+                                android:src="@mipmap/ic_la" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.7"
+                        android:orientation="horizontal"
+                        android:padding="5dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.8"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="5dp"
+                                android:text="ADDRESS"
+                                android:textAllCaps="true"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvPlaceAddressValue"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="5dp"
+                                android:text="411, NS Centre, 7th Block, C Cross, 1st Main, Behind Vodafone Showroom, Koramangala 7th Block" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.2">
+
+                            <ImageButton
+                                android:id="@+id/ibNavigateToPlace"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="5dp"
+                                android:background="@android:color/transparent"
+                                android:src="@mipmap/ic_navigation" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/cv_placeCost"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp"
+                card_view:cardCornerRadius="2dp"
+                card_view:contentPadding="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp"
+                        android:text="Cost per person"
+                        android:textAllCaps="true"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp"
+                        android:text="Rs. 250" />
 
                 </LinearLayout>
+
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
@@ -116,6 +204,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -139,6 +228,7 @@
                             android:padding="5dp"
                             android:text="Peaceful, Very less crowd" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -211,7 +301,6 @@
                     </LinearLayout>
 
 
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -247,29 +336,37 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
                 card_view:cardCornerRadius="2dp"
-                card_view:contentPadding="5dp">
+                card_view:contentPadding="10dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
-                    android:padding="5dp">
+                    android:padding="5dp"
+                    android:paddingBottom="0dp"
+                    android:paddingTop="0dp">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.8"
-                        android:text="PHOTOS"
-                        android:textStyle="bold"
                         android:layout_gravity="center_vertical"
-                        android:textAppearance="?android:attr/textAppearanceLarge"/>
+                        android:layout_weight="0.8"
+                        android:text="VIEW PHOTOS"
+                        android:padding="5dp"
+                        android:paddingBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textStyle="bold" />
 
                     <android.support.v7.widget.AppCompatImageView
                         android:id="@+id/ivPhotosRightArrow"
                         android:layout_width="0dp"
-                        android:layout_weight="0.2"
                         android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="0.2"
+                        android:padding="5dp"
+                        android:paddingBottom="0dp"
+                        android:paddingTop="0dp"
                         android:src="@drawable/right_arrow" />
 
                 </LinearLayout>
@@ -282,7 +379,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
                 card_view:cardCornerRadius="2dp"
-                card_view:contentPadding="5dp">
+                card_view:contentPadding="10dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -293,18 +390,18 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.8"
                         android:layout_gravity="center_vertical"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:layout_weight="0.8"
                         android:text="VIEW ON ZOMATO"
-                        android:textStyle="bold"/>
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textStyle="bold" />
 
                     <android.support.v7.widget.AppCompatImageView
                         android:id="@+id/ivFoodRightArrow"
                         android:layout_width="0dp"
-                        android:layout_weight="0.2"
                         android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="0.2"
                         android:src="@drawable/right_arrow" />
                 </LinearLayout>
 

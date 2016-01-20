@@ -5,6 +5,12 @@
     tools:context=".activity.MainActivity">
 
     <item
+        android:id="@+id/action_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        android:title="search"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_feedback"
         android:orderInCategory="100"
         android:title="Feedback for App"
