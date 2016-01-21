@@ -104,8 +104,8 @@
                                 android:id="@+id/ibCallPlace"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:padding="5dp"
                                 android:background="@android:color/transparent"
+                                android:padding="5dp"
                                 android:src="@mipmap/ic_la" />
 
                         </LinearLayout>
@@ -150,8 +150,8 @@
                                 android:id="@+id/ibNavigateToPlace"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:padding="5dp"
                                 android:background="@android:color/transparent"
+                                android:padding="5dp"
                                 android:src="@mipmap/ic_navigation" />
 
                         </LinearLayout>
@@ -159,7 +159,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </android.support.v7.widget.CardView>
-
 
             <android.support.v7.widget.CardView
                 android:id="@+id/cv_placeCost"
@@ -351,10 +350,10 @@
                         android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0.8"
-                        android:text="VIEW PHOTOS"
                         android:padding="5dp"
                         android:paddingBottom="0dp"
                         android:paddingTop="0dp"
+                        android:text="VIEW PHOTOS"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:textStyle="bold" />
 
@@ -444,6 +443,24 @@ So great ambiance,  decent and diverse food menu and good wifi speed, what else 
                 </LinearLayout>
             </android.support.v7.widget.CardView>
 
+            <android.support.v7.widget.CardView
+                android:id="@+id/bFillPlaceFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp"
+                card_view:cardCornerRadius="2dp"
+                card_view:contentPadding="10dp">
+
+                <Button
+                    android:id="@+id/bGoToPlaceFeedbackScreen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@color/colorPrimary"
+                    android:padding="5dp"
+                    android:text="Submit Feedback about the place"
+                    android:textColor="@android:color/white" />
+            </android.support.v7.widget.CardView>
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>

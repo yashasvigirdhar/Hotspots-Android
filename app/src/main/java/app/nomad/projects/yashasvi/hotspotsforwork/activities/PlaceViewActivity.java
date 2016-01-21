@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     PhoneCallListener phoneListener;
 
     ImageButton ibCallPlace, ibNavigateToPlace;
+    Button bGoToFeedbackScreen;
 
     Place place = null;
 
@@ -57,7 +59,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
         initialize();
 
-        //place = getIntent().getExtras().getParcelable("place");
+        place = getIntent().getExtras().getParcelable("place");
         if (place != null) {
             Log.i(TAG, "place received " + place.toString());
             populate();
@@ -90,6 +92,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         ibCallPlace.setOnClickListener(this);
         ibNavigateToPlace.setOnClickListener(this);
 
+        bGoToFeedbackScreen = (Button) findViewById(R.id.bGoToPlaceFeedbackScreen);
+        bGoToFeedbackScreen.setOnClickListener(this);
+
         phoneListener = new PhoneCallListener();
         TelephonyManager telephonyManager = (TelephonyManager) this
                 .getSystemService(Context.TELEPHONY_SERVICE);
@@ -114,16 +119,16 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case android.R.id.home:
-                Log.i(TAG,"home pressed");
+                Log.i(TAG, "home pressed");
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
 
             case R.id.action_feedback:
-                Intent i = new Intent(this, FeedbackActivity.class);
+                Intent i = new Intent(this, AppFeedbackActivity.class);
                 startActivity(i);
-            }
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -164,10 +169,10 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
             case R.id.ibNavigateToPlace:
                 String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?daddr=%f,%f", 12.939074, 77.612976);
                 //Uri gmmIntentUri = Uri.parse("google.navigation:q=12.939074,77.612976");
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-                mapIntent.setPackage("com.google.android.apps.maps");
-                if (mapIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(mapIntent);
+                i = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                i.setPackage("com.google.android.apps.maps");
+                if (i.resolveActivity(getPackageManager()) != null) {
+                    startActivity(i);
                 } else {
                     try {
                         Intent unrestrictedIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
@@ -177,6 +182,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                     }
                 }
                 break;
+            case R.id.bGoToPlaceFeedbackScreen:
+                i = new Intent(this, PlaceFeedbackActivity.class);
+                i.putExtra("place_id", place.getId());
+                i.putExtra("place_name",place.getName());
+                startActivity(i);
         }
     }
 

@@ -10,5 +10,6 @@ public class ServerConstants {
     final public static String ALL_PLACES_PATH = "places/";
     final public static String IMAGES_PATH = "images/";
 
-    public static final String APP_FEEDBACK_PATH = "feedbackapp/";
+    public static final String APP_FEEDBACK_PATH = "appfeedback";
+    public static final String PLACE_FEEDBACK_PATH = "placefeedback";
 }

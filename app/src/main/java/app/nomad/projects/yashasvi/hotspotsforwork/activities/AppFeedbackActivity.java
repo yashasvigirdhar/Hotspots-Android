@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -26,9 +28,13 @@ import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.AppFeedback;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 
-public class FeedbackActivity extends AppCompatActivity {
+public class AppFeedbackActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "AppFeedbackActivity";
+
+    int feeling = -1;
+
+    ImageButton ibHappy, ibStraight, ibSad;
 
     Button bSendAppFeedback;
     EditText etFeedbackName, etFeedbackEmail, etFeedbackMessage;
@@ -45,6 +51,13 @@ public class FeedbackActivity extends AppCompatActivity {
     private void initialize() {
         bSendAppFeedback = (Button) findViewById(R.id.bSendAppFeedback);
 
+        ibHappy = (ImageButton) findViewById(R.id.ibAppFeelingHappy);
+        ibStraight = (ImageButton) findViewById(R.id.ibAppFeelingStraight);
+        ibSad = (ImageButton) findViewById(R.id.ibAppFeelingSad);
+        ibHappy.setOnClickListener(this);
+        ibStraight.setOnClickListener(this);
+        ibSad.setOnClickListener(this);
+
         tilFeedbackName = (TextInputLayout) findViewById(R.id.tilAppFeedbackName);
         tilFeedbackEmail = (TextInputLayout) findViewById(R.id.tilAppFeedbackEmail);
         tilFeedbackMessage = (TextInputLayout) findViewById(R.id.tilAppFeedbackMessage);
@@ -56,23 +69,7 @@ public class FeedbackActivity extends AppCompatActivity {
         etFeedbackEmail.addTextChangedListener(new MyTextWatcher(etFeedbackEmail));
         etFeedbackMessage.addTextChangedListener(new MyTextWatcher(etFeedbackMessage));
 
-        bSendAppFeedback.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!validateName()) {
-                    return;
-                }
-
-                if (!validateEmail()) {
-                    return;
-                }
-
-                if (!validateMessage()) {
-                    return;
-                }
-                sendAppFeedbackToServer();
-            }
-        });
+        bSendAppFeedback.setOnClickListener(this);
     }
 
     private boolean validateName() {
@@ -127,7 +124,7 @@ public class FeedbackActivity extends AppCompatActivity {
         String feedbackName = etFeedbackName.getText().toString();
         String feedbackEmail = etFeedbackEmail.getText().toString();
         String feedbackMessage = etFeedbackMessage.getText().toString();
-        AppFeedback appFeedback = new AppFeedback(feedbackName, feedbackEmail, feedbackMessage, "1");
+        AppFeedback appFeedback = new AppFeedback(feedbackName, feedbackEmail, feedbackMessage, String.valueOf(feeling));
         String jsonString = new Gson().toJson(appFeedback);
         TestAsyncTask testAsyncTask = new TestAsyncTask(jsonString);
         testAsyncTask.execute();
@@ -176,6 +173,48 @@ public class FeedbackActivity extends AppCompatActivity {
             }
         }
         return status;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.ibAppFeelingHappy:
+                ibHappy.setBackgroundResource(R.drawable.happy_face_pressed);
+                ibStraight.setBackgroundResource(R.drawable.straight_face_normal);
+                ibSad.setBackgroundResource(R.drawable.sad_face_normal);
+                feeling = 1;
+                break;
+            case R.id.ibAppFeelingStraight:
+                ibHappy.setBackgroundResource(R.drawable.happy_face_normal);
+                ibStraight.setBackgroundResource(R.drawable.straight_face_pressed);
+                ibSad.setBackgroundResource(R.drawable.sad_face_normal);
+                feeling = 2;
+                break;
+            case R.id.ibAppFeelingSad:
+                ibHappy.setBackgroundResource(R.drawable.happy_face_normal);
+                ibStraight.setBackgroundResource(R.drawable.straight_face_normal);
+                ibSad.setBackgroundResource(R.drawable.sad_face_pressed);
+                feeling = 3;
+                break;
+            case R.id.bSendAppFeedback:
+                if (!validateName()) {
+                    return;
+                }
+
+                if (!validateEmail()) {
+                    return;
+                }
+
+                if (!validateMessage()) {
+                    return;
+                }
+                if(feeling == -1){
+                    Toast.makeText(AppFeedbackActivity.this, "Please tell us how are you feeling", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                sendAppFeedbackToServer();
+                break;
+        }
     }
 
 

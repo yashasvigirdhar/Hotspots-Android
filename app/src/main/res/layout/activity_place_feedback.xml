@@ -5,6 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/my_appbar_container"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbarPlaceFeedback"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_collapseMode="pin"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    </android.support.design.widget.AppBarLayout>
+
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,7 +34,7 @@
             android:padding="5dp">
 
             <android.support.v7.widget.CardView
-                android:id="@+id/cvAppFeelingValue"
+                android:id="@+id/cvPlaceFeelingValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -60,7 +77,7 @@
                             android:layout_weight="0.3">
 
                             <ImageButton
-                                android:id="@+id/ibAppFeelingHappy"
+                                android:id="@+id/ibFeelingHappy"
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
                                 android:layout_centerInParent="true"
@@ -76,7 +93,7 @@
                             android:layout_weight="0.3">
 
                             <ImageButton
-                                android:id="@+id/ibAppFeelingStraight"
+                                android:id="@+id/ibFeelingStraight"
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
                                 android:layout_centerInParent="true"
@@ -93,7 +110,7 @@
                             android:orientation="horizontal">
 
                             <ImageButton
-                                android:id="@+id/ibAppFeelingSad"
+                                android:id="@+id/ibFeelingSad"
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
                                 android:layout_centerInParent="true"
@@ -118,20 +135,93 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:layout_weight="0.5"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.3"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/place_feedback_feeling_bad"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.7"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <CheckBox
+                            android:id="@+id/cbWifiFeeling"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:text="Wifi"
+                            android:textAllCaps="true" />
+
+                        <CheckBox
+                            android:id="@+id/cbFoodFeeling"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:text="FOOD"
+                            android:textAllCaps="true" />
+
+                        <CheckBox
+                            android:id="@+id/cbAmbianceFeeling"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:text="Ambiance"
+                            android:textAllCaps="true" />
+
+                        <CheckBox
+                            android:id="@+id/cbServiceFeeling"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:text="Service"
+                            android:textAllCaps="true" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/cvPlaceFeelingMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="3dp"
+                card_view:cardCornerRadius="2dp"
+                card_view:contentPadding="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:focusableInTouchMode="true"
                     android:orientation="vertical"
                     android:padding="5dp">
 
                     <android.support.design.widget.TextInputLayout
-                        android:id="@+id/tilAppFeedbackName"
+                        android:id="@+id/tilPlaceFeedbackName"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:padding="5dp">
 
                         <EditText
-                            android:id="@+id/etFeedbackName"
+                            android:id="@+id/etPlaceFeedbackName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
@@ -141,49 +231,33 @@
                     </android.support.design.widget.TextInputLayout>
 
                     <android.support.design.widget.TextInputLayout
-                        android:id="@+id/tilAppFeedbackEmail"
+                        android:id="@+id/tilPlaceFeedbackMessage"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:padding="5dp">
 
                         <EditText
-                            android:id="@+id/etFeedbackEmail"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:hint="@string/hint_email"
-                            android:inputType="textEmailAddress" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/tilAppFeedbackMessage"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <EditText
-                            android:id="@+id/etFeedbackMessage"
+                            android:id="@+id/etPlaceFeedbackMessage"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:hint="@string/hint_message"
                             android:inputType="textLongMessage"
-                            android:minHeight="100dp" />
+                            android:minHeight="80dp"
+                            android:scrollbars="vertical" />
                     </android.support.design.widget.TextInputLayout>
                 </LinearLayout>
             </android.support.v7.widget.CardView>
 
             <Button
-                android:id="@+id/bSendAppFeedback"
+                android:id="@+id/bSendPlaceFeedback"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="25dp"
                 android:background="@color/colorPrimary"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:text="Send Feedback"
+                android:text="Submit"
                 android:textColor="@android:color/white" />
-
-
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>

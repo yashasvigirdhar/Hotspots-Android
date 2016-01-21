@@ -209,7 +209,7 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_feedback) {
-            Intent i = new Intent(this, FeedbackActivity.class);
+            Intent i = new Intent(this, AppFeedbackActivity.class);
             startActivity(i);
         }
 
