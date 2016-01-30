@@ -4,11 +4,16 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -37,12 +42,15 @@ import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlacesRecyclerViewAdapter;
 import app.nomad.projects.yashasvi.hotspotsforwork.contentProviders.PlaceSearchSuggestionProvider;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.LocationHelper;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 
 
-public class PlacesListActivity extends AppCompatActivity implements PlacesRecyclerViewAdapter.MyClickListener {
+public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener {
 
     final public static String LOG_TAG = "PlacesListActivity";
+    String city;
 
 
     private Toolbar mToolbar;
@@ -51,7 +59,11 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
     private PlacesRecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    LocationManager locationManager = null;
+    LocationHelper locationHelper = null;
+
     ArrayList<Place> places;
+    List<Float> distances;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +72,7 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
         setContentView(R.layout.activity_list_places);
         handleIntent(getIntent());
         initialize();
-        GetPlacesAsyncTask getPlacesAsyncTask = new GetPlacesAsyncTask(ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + "places");
+        GetPlacesAsyncTask getPlacesAsyncTask = new GetPlacesAsyncTask(ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.CITY_PATH + city);
         getPlacesAsyncTask.execute();
     }
 
@@ -83,13 +95,11 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
                     PlaceSearchSuggestionProvider.AUTHORITY, PlaceSearchSuggestionProvider.MODE);
             suggestions.saveRecentQuery(query, null);
 
-
             if (query.isEmpty())
                 mAdapter.flushFilter();
-
             mAdapter.setFilter(query);
-            Log.i(LOG_TAG, "filtered data : " + mAdapter.getFilteredData());
-            Log.i(LOG_TAG, "original data : " + mAdapter.getOriginalData());
+        } else {
+            city = intent.getStringExtra("city");
         }
     }
 
@@ -97,18 +107,38 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle(city);
 
         places = new ArrayList<>();
-
+        distances = new ArrayList<>();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PlacesRecyclerViewAdapter(places);
+        mAdapter = new PlacesRecyclerViewAdapter(places, distances,this);
         mRecyclerView.setAdapter(mAdapter);
 
-        mAdapter.setOnItemClickListener(this);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        locationHelper = new LocationHelper(this, locationManager, this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    public void calculatePlacesDistance() {
+        Location placeLocation;
+        for (int i = 0; i < places.size(); i++) {
+            placeLocation = new Location(LocationManager.GPS_PROVIDER);
+            placeLocation.setLatitude(Double.parseDouble(places.get(i).getLatitude()));
+            placeLocation.setLongitude(Double.parseDouble(places.get(i).getLongitude()));
+            distances.add(locationHelper.getLocation().distanceTo(placeLocation) / 1000);
+        }
+        mAdapter.notifyDataSetChanged();
+
     }
 
     public String getJSON(String url) {
@@ -154,10 +184,28 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
     }
 
     @Override
-    public void onItemClick(int position, View v) {
-        Intent intent = new Intent(this, PlaceViewActivity.class);
-        intent.putExtra("place", places.get(position));
-        startActivity(intent);
+    public void onLocationChanged(Location location) {
+        locationHelper.setLocation(location);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    @Override
+    public void updateGpsLocation() {
+        calculatePlacesDistance();
     }
 
     public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {
@@ -187,10 +235,11 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
             Type collectionType = new TypeToken<List<Place>>() {
             }.getType();
             try {
-                places = (ArrayList<Place>) new Gson().fromJson(jsonString, collectionType);
-                mAdapter = new PlacesRecyclerViewAdapter(places);
-                mRecyclerView.setAdapter(mAdapter);
-                //displayPlacesAdapter.notifyDataSetChanged();
+                List<Place> receivedPlaces = (ArrayList<Place>) new Gson().fromJson(jsonString, collectionType);
+                for (int i = 0; i < receivedPlaces.size(); i++)
+                    places.add(receivedPlaces.get(i));
+                mAdapter.notifyDataSetChanged();
+                locationHelper.initiateLocationProcess();
                 for (int i = 0; i < places.size(); i++)
                     Log.i(LOG_TAG, places.get(i).toString());
             } catch (JsonSyntaxException e) {
@@ -201,18 +250,39 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+
+        switch (requestCode) {
+            case Constants.REQUEST_CODE_ASK_PERMISSIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationHelper.initiateLocationProcess();
+                    if (locationHelper.getLocation() != null)
+                        calculatePlacesDistance();
+                } else {
+                    Toast.makeText(this, "You have to grant permissions in order to show distance", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_feedback) {
-            Intent i = new Intent(this, AppFeedbackActivity.class);
-            startActivity(i);
+        Intent i;
+        switch (item.getItemId()) {
+            case R.id.action_feedback:
+                i = new Intent(this, AppFeedbackActivity.class);
+                startActivity(i);
+                break;
+            case R.id.action_newPlace:
+                i = new Intent(this, SuggestNewPlaceActivity.class);
+                startActivity(i);
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -238,9 +308,6 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
                     if (query.isEmpty())
                         mAdapter.flushFilter();
                     mAdapter.setFilter(query);
-                    Log.i(LOG_TAG,"filtered data : " + mAdapter.getFilteredData());
-                    Log.i(LOG_TAG, "original data : " + mAdapter.getOriginalData());
-                    Log.i(LOG_TAG, "query : " + query);
                     Log.i(LOG_TAG, "adding to search suggestions");
                     SearchRecentSuggestions suggestions = new SearchRecentSuggestions(getBaseContext(),
                             PlaceSearchSuggestionProvider.AUTHORITY, PlaceSearchSuggestionProvider.MODE);
@@ -255,8 +322,6 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
                     if (query.isEmpty())
                         mAdapter.flushFilter();
                     mAdapter.setFilter(query);
-                    Log.i(LOG_TAG,"filtered data : " + mAdapter.getFilteredData());
-                    Log.i(LOG_TAG, "original data : " + mAdapter.getOriginalData());
                     return true;
                 }
             });
@@ -278,4 +343,14 @@ public class PlacesListActivity extends AppCompatActivity implements PlacesRecyc
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Constants.REQUEST_CODE_INTENT_GPS_SETTINGS) {
+            Toast.makeText(this, "Calculating distance of places from here", Toast.LENGTH_SHORT).show();
+            locationHelper.updateIsGpsEnabled();
+            locationHelper.initiateLocationProcess();
+
+        }
+    }
 }

@@ -15,7 +15,8 @@
 
     <string name="place_feedback_feeling">How are you feeling?</string>
     <string name="place_feedback_feeling_bad">Reasons?</string>
-    <string name="place_feedback_feeling_good">What was best? :) </string>
+
+    <string name="select_city">Select Your City</string>
 
 
     <string name="path_circle">
