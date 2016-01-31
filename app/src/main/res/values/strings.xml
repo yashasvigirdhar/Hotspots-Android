@@ -49,4 +49,8 @@
     M 30,70
     Q 50,70 70,71
   </string>
+
+    <string name="title_activity_fullscreen_place_images">FullscreenPlaceImagesActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

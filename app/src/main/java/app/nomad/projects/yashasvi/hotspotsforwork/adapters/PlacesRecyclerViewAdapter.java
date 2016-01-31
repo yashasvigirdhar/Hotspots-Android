@@ -57,7 +57,7 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         String address = mDataset.get(position).getAddress();
         String area = address.substring(address.lastIndexOf(',') + 1) + ", " + mDataset.get(position).getCity();
         holder.tvPlaceArea.setText(area);
-        holder.tvPlaceCost.setText(mDataset.get(position).getCost());
+        holder.tvPlaceCost.append(mDataset.get(position).getCost());
         holder.tvPlaceRating.setText(mDataset.get(position).getRating());
         if (distances.size() > position)
             holder.tvPlaceDistance.setText(String.format("%.2f", distances.get(position)) + " km");

@@ -1,7 +1,6 @@
 package app.nomad.projects.yashasvi.hotspotsforwork.activities;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,7 +44,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     CardView cvFood;
     CardView cvPhotos;
 
-    PhoneCallListener phoneListener;
+    //PhoneCallListener phoneListener;
 
     ImageButton ibCallPlace, ibNavigateToPlace;
     Button bGoToFeedbackScreen;
@@ -95,10 +94,10 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         bGoToFeedbackScreen = (Button) findViewById(R.id.bGoToPlaceFeedbackScreen);
         bGoToFeedbackScreen.setOnClickListener(this);
 
-        phoneListener = new PhoneCallListener();
-        TelephonyManager telephonyManager = (TelephonyManager) this
-                .getSystemService(Context.TELEPHONY_SERVICE);
-        telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
+        //phoneListener = new PhoneCallListener();
+        //TelephonyManager telephonyManager = (TelephonyManager) this
+        //      .getSystemService(Context.TELEPHONY_SERVICE);
+        //telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     private void populate() {
@@ -154,6 +153,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
             case R.id.cv_placePhotos:
                 i = new Intent(this, PlaceImagesActivity.class);
                 i.putExtra("place_id", place.getId().toString());
+                i.putExtra("place_name", place.getName());
                 startActivity(i);
                 break;
             case R.id.ibCallPlace:
@@ -185,7 +185,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
             case R.id.bGoToPlaceFeedbackScreen:
                 i = new Intent(this, PlaceFeedbackActivity.class);
                 i.putExtra("place_id", place.getId());
-                i.putExtra("place_name",place.getName());
+                i.putExtra("place_name", place.getName());
                 startActivity(i);
         }
     }
