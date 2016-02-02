@@ -57,8 +57,8 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
 
     private void initialize() {
 
-        place_id = getIntent().getIntExtra("place_id",-1);
-        placeName = getIntent().getStringExtra("place_name");
+        place_id = getIntent().getIntExtra("placeId",-1);
+        placeName = getIntent().getStringExtra("placeName");
 
         toolbar = (Toolbar) findViewById(R.id.toolbarPlaceFeedback);
         setSupportActionBar(toolbar);
@@ -183,7 +183,7 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
             connection.setRequestProperty("Content-Type", "application/json");
             connection.connect();
             DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(jsonData.toString());
+            wr.writeBytes(jsonData);
             wr.flush();
             wr.close();
             status = connection.getResponseCode();
@@ -191,7 +191,7 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
             InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             String line;
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
             while ((line = rd.readLine()) != null) {
                 response.append(line);
                 response.append('\r');
@@ -221,14 +221,8 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
         }
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
         protected Integer doInBackground(Void... params) {
-            int responseFromServer = postJSON(jsonData);
-            return responseFromServer;
+            return postJSON(jsonData);
         }
 
         @Override

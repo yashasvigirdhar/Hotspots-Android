@@ -12,7 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -29,22 +29,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.ConnectException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlacesRecyclerViewAdapter;
-import app.nomad.projects.yashasvi.hotspotsforwork.contentProviders.PlaceSearchSuggestionProvider;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.LocationHelper;
-import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
 
 
 public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener {
@@ -53,11 +47,8 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     String city;
 
 
-    private Toolbar mToolbar;
-
     private RecyclerView mRecyclerView;
     private PlacesRecyclerViewAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     LocationManager locationManager = null;
     LocationHelper locationHelper = null;
@@ -72,8 +63,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         setContentView(R.layout.activity_list_places);
         handleIntent(getIntent());
         initialize();
-        GetPlacesAsyncTask getPlacesAsyncTask = new GetPlacesAsyncTask(ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.CITY_PATH + city);
-        getPlacesAsyncTask.execute();
+        getPlaces();
+    }
+
+    private void getPlaces() {
+        new GetPlacesAsyncTask(UtilFunctions.getPlacesUrlByCity(city)).execute();
     }
 
     @Override
@@ -90,10 +84,6 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             Log.i(LOG_TAG, "search intent");
             String query = intent.getStringExtra(SearchManager.QUERY);
             Log.i(LOG_TAG, "query : " + query);
-            Log.i(LOG_TAG, "adding to search suggestions");
-            SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
-                    PlaceSearchSuggestionProvider.AUTHORITY, PlaceSearchSuggestionProvider.MODE);
-            suggestions.saveRecentQuery(query, null);
 
             if (query.isEmpty())
                 mAdapter.flushFilter();
@@ -104,9 +94,10 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     }
 
     private void initialize() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(city);
 
         places = new ArrayList<>();
@@ -114,19 +105,14 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PlacesRecyclerViewAdapter(places, distances,this);
+        mAdapter = new PlacesRecyclerViewAdapter(places, distances, this);
         mRecyclerView.setAdapter(mAdapter);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         locationHelper = new LocationHelper(this, locationManager, this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     public void calculatePlacesDistance() {
@@ -141,46 +127,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     }
 
-    public String getJSON(String url) {
-        HttpURLConnection connection = null;
-        try {
-            URL u = new URL(url);
-            connection = (HttpURLConnection) u.openConnection();
-            connection.connect();
-            int status = connection.getResponseCode();
-            Log.i(LOG_TAG, "status : " + status);
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-            br.close();
-            return sb.toString();
-
-        } catch (ConnectException ex) {
-            return ex.toString();
-        } catch (Exception ex) {
-            return ex.toString();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.disconnect();
-                } catch (Exception ex) {
-                    //disconnect error
-                }
-            }
-        }
-    }
-
     public boolean isConnected() {
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected())
-            return true;
-        else
-            return false;
+        return (networkInfo != null && networkInfo.isConnected());
+
     }
 
     @Override
@@ -205,6 +156,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     public void updateGpsLocation() {
+        Log.i(LOG_TAG, "updateGpsLocation");
         calculatePlacesDistance();
     }
 
@@ -217,14 +169,9 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         }
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
         protected String doInBackground(Void... params) {
-            String resultString = null;
-            resultString = getJSON(mUrl);
+            String resultString;
+            resultString = UtilFunctions.getJSON(mUrl);
             return resultString;
         }
 
@@ -250,7 +197,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, int[] grantResults) {
 
         switch (requestCode) {
             case Constants.REQUEST_CODE_ASK_PERMISSIONS:
@@ -265,25 +212,6 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        Intent i;
-        switch (item.getItemId()) {
-            case R.id.action_feedback:
-                i = new Intent(this, AppFeedbackActivity.class);
-                startActivity(i);
-                break;
-            case R.id.action_newPlace:
-                i = new Intent(this, SuggestNewPlaceActivity.class);
-                startActivity(i);
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -304,21 +232,15 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                 @Override
                 public boolean onQueryTextSubmit(String query) {
                     Log.i(LOG_TAG, "onQueryTextSubmit : query : " + query);
-
                     if (query.isEmpty())
                         mAdapter.flushFilter();
                     mAdapter.setFilter(query);
-                    Log.i(LOG_TAG, "adding to search suggestions");
-                    SearchRecentSuggestions suggestions = new SearchRecentSuggestions(getBaseContext(),
-                            PlaceSearchSuggestionProvider.AUTHORITY, PlaceSearchSuggestionProvider.MODE);
-                    suggestions.saveRecentQuery(query, null);
                     return true;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String query) {
                     Log.i(LOG_TAG, "onQueryTextChange : query : " + query);
-
                     if (query.isEmpty())
                         mAdapter.flushFilter();
                     mAdapter.setFilter(query);

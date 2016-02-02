@@ -2,13 +2,16 @@ package app.nomad.projects.yashasvi.hotspotsforwork;
 
 import android.app.Application;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ImageMemoryCache;
 
 /**
- * Created by ygirdha on 1/31/16.
+ * Created by yashasvi on 1/31/16.
  */
 public class MyApplication extends Application {
+
+    String LOG_TAG = "MyApplication";
 
     ImageMemoryCache mMemoryCache;
     int cacheSize;
@@ -22,18 +25,21 @@ public class MyApplication extends Application {
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 
         // Use 1/8th of the available memory for this memory cache.
-        final int cacheSize = maxMemory / 8;
+        cacheSize = maxMemory / 8;
 
         mMemoryCache = new ImageMemoryCache(cacheSize);
     }
 
     public void putBitmapInCache(String key, Bitmap bt) {
-        mMemoryCache.put(key, bt);
+        try {
+            mMemoryCache.put(key, bt);
+        } catch (NullPointerException ex) {
+            Log.e(LOG_TAG, ex.toString());
+        }
     }
 
     public Bitmap getBitmapFromCache(String key) {
-        Bitmap bt = mMemoryCache.get(key);
-        return bt;
+        return mMemoryCache.get(key);
     }
 
 }

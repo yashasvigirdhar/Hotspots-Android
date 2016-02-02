@@ -2,32 +2,44 @@ package app.nomad.projects.yashasvi.hotspotsforwork.activities;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Locale;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
+import app.nomad.projects.yashasvi.hotspotsforwork.models.PlaceImages;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
 
 public class PlaceViewActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String TAG = "PlaceViewActivity";
+
+    int imagesCount = -1;
+    String imagesPath;
+
+    ImageView ivPlaceCover;
 
     TextView tvAmbiance;
     TextView tvAddress;
@@ -44,7 +56,6 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     CardView cvFood;
     CardView cvPhotos;
 
-    //PhoneCallListener phoneListener;
 
     ImageButton ibCallPlace, ibNavigateToPlace;
     Button bGoToFeedbackScreen;
@@ -62,6 +73,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         if (place != null) {
             Log.i(TAG, "place received " + place.toString());
             populate();
+            new downloadImageAsyncTask(UtilFunctions.getPlaceImagesObjectUrl(place.getId())).execute();
         }
     }
 
@@ -71,6 +83,8 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         collapsing_container = (CollapsingToolbarLayout) findViewById(R.id.collapsing_container);
+
+        ivPlaceCover = (ImageView) findViewById(R.id.ivPlaceCover);
 
         cvFood = (CardView) findViewById(R.id.cv_placeFood);
         cvFood.setOnClickListener(this);
@@ -94,10 +108,6 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         bGoToFeedbackScreen = (Button) findViewById(R.id.bGoToPlaceFeedbackScreen);
         bGoToFeedbackScreen.setOnClickListener(this);
 
-        //phoneListener = new PhoneCallListener();
-        //TelephonyManager telephonyManager = (TelephonyManager) this
-        //      .getSystemService(Context.TELEPHONY_SERVICE);
-        //telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     private void populate() {
@@ -113,35 +123,6 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                Log.i(TAG, "home pressed");
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
-
-            case R.id.action_feedback:
-                Intent i = new Intent(this, AppFeedbackActivity.class);
-                startActivity(i);
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        final MenuItem item = menu.findItem(R.id.action_search);
-        item.setVisible(false);
-        invalidateOptionsMenu();
-        return true;
-    }
-
-
-    @Override
     public void onClick(View v) {
         Intent i;
         switch (v.getId()) {
@@ -152,8 +133,18 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.cv_placePhotos:
                 i = new Intent(this, PlaceImagesActivity.class);
-                i.putExtra("place_id", place.getId().toString());
-                i.putExtra("place_name", place.getName());
+                i.putExtra("placeId", place.getId().toString());
+                i.putExtra("placeName", place.getName());
+                i.putExtra("images_count", imagesCount);
+                i.putExtra("images_path", imagesPath);
+                startActivity(i);
+                break;
+            case R.id.ivPlaceCover:
+                i = new Intent(this, PlaceImagesActivity.class);
+                i.putExtra("placeId", place.getId().toString());
+                i.putExtra("placeName", place.getName());
+                i.putExtra("images_count", imagesCount);
+                i.putExtra("images_path", imagesPath);
                 startActivity(i);
                 break;
             case R.id.ibCallPlace:
@@ -168,7 +159,6 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.ibNavigateToPlace:
                 String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?daddr=%f,%f", 12.939074, 77.612976);
-                //Uri gmmIntentUri = Uri.parse("google.navigation:q=12.939074,77.612976");
                 i = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 i.setPackage("com.google.android.apps.maps");
                 if (i.resolveActivity(getPackageManager()) != null) {
@@ -184,51 +174,70 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.bGoToPlaceFeedbackScreen:
                 i = new Intent(this, PlaceFeedbackActivity.class);
-                i.putExtra("place_id", place.getId());
-                i.putExtra("place_name", place.getName());
+                i.putExtra("placeId", place.getId());
+                i.putExtra("placeName", place.getName());
                 startActivity(i);
+                break;
+
         }
     }
 
-    private class PhoneCallListener extends PhoneStateListener {
+    private PlaceImages getPlaceImages(String url) {
+        PlaceImages placeImages = null;
+        HttpURLConnection connection;
+        try {
+            //get PlaceImages object
+            URL u = new URL(url);
+            Log.i(TAG, "getting place images " + u.toString());
+            connection = (HttpURLConnection) u.openConnection();
+            connection.connect();
+            int status = connection.getResponseCode();
+            Log.i(TAG, "status : " + status);
 
-        private boolean isPhoneCalling = false;
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            br.close();
 
+            placeImages = new Gson().fromJson(sb.toString(), PlaceImages.class);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (placeImages != null)
+            Log.i(TAG, placeImages.toString());
+        return placeImages;
+    }
+
+    public class downloadImageAsyncTask extends AsyncTask<Void, Object, Void> {
+
+        String placeImageUrl;
+
+        downloadImageAsyncTask(String url) {
+            placeImageUrl = url;
+        }
 
         @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
+        protected Void doInBackground(Void... params) {
+            PlaceImages placeImages = getPlaceImages(placeImageUrl);
+            imagesCount = placeImages.getCount();
+            imagesPath = placeImages.getPath();
+            String coverImageUrl = UtilFunctions.getPlaceCoverImageUrl(imagesPath, place.getName());
+            Bitmap bt = UtilFunctions.downloadBitmapFromUrl(coverImageUrl);
+            if (bt != null)
+                publishProgress(bt);
+            return null;
+        }
 
-            if (TelephonyManager.CALL_STATE_RINGING == state) {
-                // phone ringing
-                Log.i(TAG, "RINGING, number: " + incomingNumber);
-            }
-
-            if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
-                // active
-                Log.i(TAG, "OFFHOOK");
-
-                isPhoneCalling = true;
-            }
-
-            if (TelephonyManager.CALL_STATE_IDLE == state) {
-                // run when class initial and phone call ended,
-                // need detect flag from CALL_STATE_OFFHOOK
-                Log.i(TAG, "IDLE");
-
-                if (isPhoneCalling) {
-
-                    Log.i(TAG, "restart app");
-
-                    // restart app
-                    Intent i = new Intent(getApplicationContext(), PlaceViewActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    //i.putExtra("place",place);
-                    startActivity(i);
-
-                    isPhoneCalling = false;
-                }
-
-            }
+        @Override
+        protected void onProgressUpdate(Object... values) {
+            super.onProgressUpdate(values);
+            ivPlaceCover.setImageBitmap((Bitmap) values[0]);
+            ivPlaceCover.setOnClickListener(PlaceViewActivity.this);
+//            ivPlaceCover.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_IN);
         }
     }
 }

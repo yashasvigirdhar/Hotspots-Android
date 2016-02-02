@@ -23,10 +23,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name=".activities.PlacesListActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:parentActivityName=".activities.CitySelectionActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.CitySelectionActivity" />
+
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -47,10 +51,20 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.PlacesListActivity" />
         </activity>
-        <activity android:name=".activities.AppFeedbackActivity" />
+        <activity
+            android:name=".activities.AppFeedbackActivity"
+            android:parentActivityName=".activities.CitySelectionActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.CitySelectionActivity" />
+        </activity>
         <activity android:name=".activities.ZomatoWebviewActivity" />
-        <activity android:name=".activities.PlaceImagesActivity">
-
+        <activity
+            android:name=".activities.PlaceImagesActivity"
+            android:parentActivityName=".activities.PlaceViewActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.PlaceViewActivity" />
         </activity>
 
         <provider
@@ -58,8 +72,13 @@
             android:authorities="app.nomad.projects.yashasvi.hotspotsforwork.contentProviders.PlaceSearchSuggestionProvider" />
 
         <activity android:name=".activities.PlaceFeedbackActivity" />
-
-        <activity android:name=".activities.SuggestNewPlaceActivity"></activity>
+        <activity
+            android:name=".activities.SuggestNewPlaceActivity"
+            android:parentActivityName=".activities.CitySelectionActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.CitySelectionActivity" />
+        </activity>
         <activity
             android:name=".activities.FullscreenPlaceImagesActivity"
             android:label="@string/title_activity_fullscreen_place_images"
@@ -67,7 +86,13 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.PlaceImagesActivity" />
-
+        </activity>
+        <activity
+            android:name=".activities.AboutMeActivity"
+            android:parentActivityName=".activities.CitySelectionActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.CitySelectionActivity" />
         </activity>
     </application>
 

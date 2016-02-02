@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
 /**
- * Created by ygirdha on 1/31/16.
+ * Created by yashasvi on 1/31/16.
  */
 public class ImageMemoryCache extends LruCache<String, Bitmap> {
     /**

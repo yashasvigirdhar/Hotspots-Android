@@ -16,7 +16,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 /**
- * Created by ygirdha on 1/29/16.
+ * Created by yashasvi on 1/29/16.
  */
 public class LocationHelper {
 
@@ -86,7 +86,6 @@ public class LocationHelper {
             e.printStackTrace();
         }
         setLocation();
-        return;
     }
 
 

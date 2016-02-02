@@ -16,7 +16,7 @@ import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.activities.FullscreenPlaceImagesActivity;
 
 /**
- * Created by ygirdha on 1/15/16.
+ * Created by yashasvi on 1/15/16.
  */
 public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceImagesRecyclerViewAdapter.PlaceImageRecyclerViewHolder> implements View.OnClickListener {
 
@@ -43,8 +43,7 @@ public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceIm
     @Override
     public PlaceImageRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.place_image_card, null);
-        PlaceImageRecyclerViewHolder holder = new PlaceImageRecyclerViewHolder(layoutView);
-        return holder;
+        return new PlaceImageRecyclerViewHolder(layoutView);
     }
 
     @Override

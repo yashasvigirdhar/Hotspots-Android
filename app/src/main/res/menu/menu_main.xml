@@ -10,16 +10,4 @@
         android:title="search"
         app:showAsAction="always" />
 
-    <item
-        android:id="@+id/action_feedback"
-        android:orderInCategory="100"
-        android:title="Feedback for App"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_newPlace"
-        android:orderInCategory="100"
-        android:title="Suggest a new place"
-        app:showAsAction="never" />
-
 </menu>

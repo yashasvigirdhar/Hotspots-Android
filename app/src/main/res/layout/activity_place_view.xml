@@ -12,12 +12,21 @@
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
+
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:contentScrim="@color/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <ImageView
+                android:id="@+id/ivPlaceCover"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                app:layout_collapseParallaxMultiplier="0.7" />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/technique_three_toolbar"
@@ -138,7 +147,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:padding="5dp"
-                                android:text="411, NS Centre, 7th Block, C Cross, 1st Main, Behind Vodafone Showroom, Koramangala 7th Block" />
+                                android:text="@string/dummy_address" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -213,7 +222,7 @@
                         <TextView
                             android:id="@+id/tvAmbianceKey"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
                             android:padding="5dip"
                             android:text="Ambiance"
@@ -283,7 +292,7 @@
                         <TextView
                             android:id="@+id/tvWifiPaidKey"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
                             android:padding="5dip"
                             android:text="Paid Wifi"
@@ -309,7 +318,7 @@
                         <TextView
                             android:id="@+id/tvChargingPointsKey"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
                             android:padding="5dip"
                             android:text="Charging points"

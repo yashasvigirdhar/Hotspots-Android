@@ -15,13 +15,12 @@ import java.util.List;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 
 /**
- * Created by ygirdha on 1/30/16.
+ * Created by yashasvi on 1/30/16.
  */
 public class FullScreenPlaceImageAdapter extends PagerAdapter {
 
     private Activity mActivity;
     private List<Bitmap> imageBitmaps;
-    private LayoutInflater inflater;
 
     public FullScreenPlaceImageAdapter(Activity activity, List<Bitmap> bitmaps) {
         this.mActivity = activity;
@@ -42,7 +41,7 @@ public class FullScreenPlaceImageAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         ImageView imgDisplay;
 
-        inflater = (LayoutInflater) mActivity
+        LayoutInflater inflater = (LayoutInflater) mActivity
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewLayout = inflater.inflate(R.layout.place_image_fullscreen, container,
                 false);

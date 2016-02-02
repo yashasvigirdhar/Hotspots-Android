@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -34,6 +35,8 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
 
     int feeling = -1;
 
+    Toolbar mToolbar;
+
     ImageButton ibHappy, ibStraight, ibSad;
 
     Button bSendAppFeedback;
@@ -46,9 +49,15 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_feedback_app);
 
         initialize();
+
     }
 
     private void initialize() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbarAppFeedback);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.app_feedback_activity_title);
+
         bSendAppFeedback = (Button) findViewById(R.id.bSendAppFeedback);
 
         ibHappy = (ImageButton) findViewById(R.id.ibAppFeelingHappy);
@@ -145,7 +154,7 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
             connection.setRequestProperty("Content-Type", "application/json");
             connection.connect();
             DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(jsonData.toString());
+            wr.writeBytes(jsonData);
             wr.flush();
             wr.close();
             status = connection.getResponseCode();
@@ -153,7 +162,7 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
             InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             String line;
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
             while ((line = rd.readLine()) != null) {
                 response.append(line);
                 response.append('\r');
@@ -208,7 +217,7 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
                 if (!validateMessage()) {
                     return;
                 }
-                if(feeling == -1){
+                if (feeling == -1) {
                     Toast.makeText(AppFeedbackActivity.this, "Please tell us how are you feeling", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -226,14 +235,8 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
         }
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
         protected Integer doInBackground(Void... params) {
-            int responseFromServer = postJSON(jsonData);
-            return responseFromServer;
+            return postJSON(jsonData);
         }
 
         @Override

@@ -3,7 +3,7 @@ package app.nomad.projects.yashasvi.hotspotsforwork.contentProviders;
 import android.content.SearchRecentSuggestionsProvider;
 
 /**
- * Created by ygirdha on 1/20/16.
+ * Created by yashasvi on 1/20/16.
  */
 public class PlaceSearchSuggestionProvider extends SearchRecentSuggestionsProvider {
 

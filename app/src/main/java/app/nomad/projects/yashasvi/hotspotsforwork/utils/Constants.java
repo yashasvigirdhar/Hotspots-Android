@@ -1,7 +1,7 @@
 package app.nomad.projects.yashasvi.hotspotsforwork.utils;
 
 /**
- * Created by ygirdha on 1/29/16.
+ * Created by yashasvi on 1/29/16.
  */
 public class Constants {
 

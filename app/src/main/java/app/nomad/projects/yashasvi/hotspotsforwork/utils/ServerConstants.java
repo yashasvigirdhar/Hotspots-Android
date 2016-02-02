@@ -1,7 +1,7 @@
 package app.nomad.projects.yashasvi.hotspotsforwork.utils;
 
 /**
- * Created by ygirdha on 12/24/15.
+ * Created by yashasvi on 12/24/15.
  */
 public class ServerConstants {
 
@@ -15,4 +15,5 @@ public class ServerConstants {
     public static final String PLACE_FEEDBACK_PATH = "placefeedback";
 
     public static final String THUMBNAILS_PATH = "thumbnails";
+    public static final String COVER_PATH = "cover";
 }

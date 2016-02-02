@@ -1,7 +1,7 @@
 package app.nomad.projects.yashasvi.hotspotsforwork.models;
 
 /**
- * Created by ygirdha on 1/6/16.
+ * Created by yashasvi on 1/6/16.
  */
 public class PlaceImages {
 

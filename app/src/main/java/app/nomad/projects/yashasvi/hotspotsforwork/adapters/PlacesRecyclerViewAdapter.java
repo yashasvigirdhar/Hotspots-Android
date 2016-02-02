@@ -23,7 +23,7 @@ import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 
 
 /**
- * Created by ygirdha on 1/9/16.
+ * Created by yashasvi on 1/9/16.
  */
 public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecyclerViewAdapter.DataObjectHolder> implements View.OnClickListener {
 
@@ -46,8 +46,7 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.place_card, parent, false);
 
-        DataObjectHolder dataObjectHolder = new DataObjectHolder(view);
-        return dataObjectHolder;
+        return new DataObjectHolder(view);
     }
 
 
@@ -57,7 +56,7 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         String address = mDataset.get(position).getAddress();
         String area = address.substring(address.lastIndexOf(',') + 1) + ", " + mDataset.get(position).getCity();
         holder.tvPlaceArea.setText(area);
-        holder.tvPlaceCost.append(mDataset.get(position).getCost());
+        holder.tvPlaceCost.setText(mContext.getString(R.string.cost_per_person) + mDataset.get(position).getCost());
         holder.tvPlaceRating.setText(mDataset.get(position).getRating());
         if (distances.size() > position)
             holder.tvPlaceDistance.setText(String.format("%.2f", distances.get(position)) + " km");
@@ -179,7 +178,7 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
     public void setFilter(String constraint) {
 
         mDataset = new ArrayList<>();
-        constraint = constraint.toString().toLowerCase();
+        constraint = constraint.toLowerCase();
         for (Place item : all_Places) {
             if (item.getName().toLowerCase().contains(constraint))
                 mDataset.add(item);

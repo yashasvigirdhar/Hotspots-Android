@@ -7,12 +7,10 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.Window;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +33,8 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
     ViewPager mPager;
 
     String imageUrl;
-    String place_id;
-    String place_name;
+    String placeId;
+    String placeName;
     int position;
     int imagesCount;
 
@@ -57,10 +55,10 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         placeImageBitmaps = new ArrayList<>();
 
         imagesCount = getIntent().getIntExtra("images_count", 0);
-        place_id = getIntent().getStringExtra("place_id");
-        place_name = getIntent().getStringExtra("place_name");
+        placeId = getIntent().getStringExtra("place_id");
+        placeName = getIntent().getStringExtra("place_name");
         position = getIntent().getIntExtra("position", 0);
-        Log.i(LOG_TAG, "images_count " + imagesCount + ", place_id " + place_id + "place_name " + place_name + ", position " + position);
+        Log.i(LOG_TAG, "images_count " + imagesCount + ", placeId " + placeId + "placeName " + placeName + ", position " + position);
 
         populateAdapter();
 
@@ -74,22 +72,22 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         Bitmap bt;
         String key;
         for (int i = 0; i < imagesCount; i++) {
-            key = UtilFunctions.getImageCacheKey(place_id, i, ImageSize.FULL);
+            key = UtilFunctions.getImageCacheKey(placeId, i, ImageSize.FULL);
             bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
             if (bt != null) {
+                placeImageBitmaps.add(bt);
                 Log.i(LOG_TAG, "adding full size image from cache " + i);
             } else {
-                key = UtilFunctions.getImageCacheKey(place_id, i, ImageSize.THUMBNAIL);
+                key = UtilFunctions.getImageCacheKey(placeId, i, ImageSize.THUMBNAIL);
                 bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
-                Log.i(LOG_TAG, "adding image thumbnail from cache " + i);
-            }
-            placeImageBitmaps.add(bt);
-        }
-    }
+                if (bt != null) {
+                    placeImageBitmaps.add(bt);
+                    Log.i(LOG_TAG, "adding image thumbnail from cache " + i);
+                }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+            }
+
+        }
     }
 
 
@@ -101,10 +99,6 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
             System.out.println("Downloading image " + u.toString());
             imageBitmap = BitmapFactory.decodeStream((InputStream) u.getContent());
             Log.i("image activity", "Download Completed Successfully");
-
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -122,7 +116,7 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         Log.i(LOG_TAG, "page selected " + pos);
         position = pos;
         Bitmap bt;
-        String key = UtilFunctions.getImageCacheKey(place_id, position, ImageSize.FULL);
+        String key = UtilFunctions.getImageCacheKey(placeId, position, ImageSize.FULL);
         bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
         if (bt != null) {
             Log.i(LOG_TAG, "cache hit \\m/\nalready contains full size image");
@@ -130,7 +124,7 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         }
         Log.i(LOG_TAG, "cache miss /m\\");
         imageUrl = ServerConstants.SERVER_URL + ServerConstants.IMAGES_PATH +
-                place_name + "/" + place_name + String.valueOf(pos) + ".png";
+                placeName + "/" + placeName + String.valueOf(pos) + ".png";
         imageUrl = imageUrl.replace(" ", "%20");
         new downloadImageAsyncTask(imageUrl).execute();
     }
@@ -160,7 +154,7 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
             super.onProgressUpdate(bitmaps[0]);
             updateImageToFullSize(bitmaps[0]);
 
-            ((MyApplication) getApplication()).putBitmapInCache(UtilFunctions.getImageCacheKey(place_id, position, ImageSize.FULL), bitmaps[0]);
+            ((MyApplication) getApplication()).putBitmapInCache(UtilFunctions.getImageCacheKey(placeId, position, ImageSize.FULL), bitmaps[0]);
         }
 
     }
