@@ -51,7 +51,7 @@ public class LocationHelper {
         updateIsGpsEnabled();
     }
 
-    public void updateIsGpsEnabled(){
+    public void updateIsGpsEnabled() {
         isGPSEnabled = locationManager
                 .isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
@@ -63,10 +63,10 @@ public class LocationHelper {
             int hasGpsPermission = ContextCompat.checkSelfPermission(parentActivity, Manifest.permission.ACCESS_FINE_LOCATION);
 
             if (hasGpsPermission != PackageManager.PERMISSION_GRANTED) {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(parentActivity,
+                if (ActivityCompat.shouldShowRequestPermissionRationale(parentActivity,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                    showMessageOKCancel("You need to allow access to Contacts",
+                    //TODO : decide what to do here
+                    showMessageOKCancel("You need to allow access to Location to show distances to places",
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -144,7 +144,7 @@ public class LocationHelper {
                     Toast.makeText(parentActivity, "You need to enable gps to show distances", Toast.LENGTH_SHORT).show();
                 }
             }
-        }else {
+        } else {
             showSettingsAlert();
         }
     }

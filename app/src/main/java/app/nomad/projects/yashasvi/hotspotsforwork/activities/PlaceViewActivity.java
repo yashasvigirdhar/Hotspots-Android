@@ -7,10 +7,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -30,14 +34,17 @@ import java.util.Locale;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.PlaceImages;
-import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 
 public class PlaceViewActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String TAG = "PlaceViewActivity";
 
+    private ShareActionProvider mShareActionProvider;
+
     int imagesCount = -1;
-    String imagesPath;
+    String imagesPath = "";
 
     ImageView ivPlaceCover;
 
@@ -73,8 +80,14 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         if (place != null) {
             Log.i(TAG, "place received " + place.toString());
             populate();
-            new downloadImageAsyncTask(UtilFunctions.getPlaceImagesObjectUrl(place.getId())).execute();
+            new downloadImageAsyncTask(ServerHelperFunctions.getPlaceImagesObjectUrl(place.getId())).execute();
+
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
     }
 
     private void initialize() {
@@ -112,12 +125,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
     private void populate() {
         collapsing_container.setTitle(place.getName());
-
         tvAddress.setText(place.getAddress());
         tvAmbiance.setText(String.valueOf(place.getAmbiance()));
         tvService.setText(String.valueOf(place.getService()));
-        tvChargingPoints.setText(place.getChargingPoints());
-        tvWifiSpeed.setText(String.valueOf(place.getWifiSpeed()));
+        tvChargingPoints.setText(Constants.chargingPointsLevel.get(Integer.parseInt(place.getChargingPoints())));
+        tvWifiSpeed.setText(Constants.wifiSpeedLevel.get(Integer.parseInt(place.getWifiSpeed())));
         tvWifiPaid.setText(place.getWifiPaid());
         tvDescription.setText(place.getDescription());
     }
@@ -158,7 +170,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 }
                 break;
             case R.id.ibNavigateToPlace:
-                String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?daddr=%f,%f", 12.939074, 77.612976);
+                String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?daddr=%f,%f", Double.parseDouble(place.getLatitude()), Double.parseDouble(place.getLongitude()));
                 i = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 i.setPackage("com.google.android.apps.maps");
                 if (i.resolveActivity(getPackageManager()) != null) {
@@ -179,6 +191,35 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 startActivity(i);
                 break;
 
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate menu resource file.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchItem.setVisible(false);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.action_share);
+
+        // Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        Intent myShareIntent = new Intent(Intent.ACTION_SEND);
+        myShareIntent.setType("text/plain");
+        myShareIntent.putExtra(Intent.EXTRA_TEXT, String.format(Constants.PLACE_SHARE_TEXT, place.getName(), place.getWifiSpeed()));
+        setShareIntent(myShareIntent);
+
+        // Return true to display menu
+        return true;
+    }
+
+    // Call to update the share intent
+    private void setShareIntent(Intent shareIntent) {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
         }
     }
 
@@ -212,6 +253,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         return placeImages;
     }
 
+
     public class downloadImageAsyncTask extends AsyncTask<Void, Object, Void> {
 
         String placeImageUrl;
@@ -223,10 +265,12 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         @Override
         protected Void doInBackground(Void... params) {
             PlaceImages placeImages = getPlaceImages(placeImageUrl);
+            if (placeImages == null)
+                return null;
             imagesCount = placeImages.getCount();
             imagesPath = placeImages.getPath();
-            String coverImageUrl = UtilFunctions.getPlaceCoverImageUrl(imagesPath, place.getName());
-            Bitmap bt = UtilFunctions.downloadBitmapFromUrl(coverImageUrl);
+            String coverImageUrl = ServerHelperFunctions.getPlaceCoverImageUrl(imagesPath, place.getName());
+            Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(coverImageUrl);
             if (bt != null)
                 publishProgress(bt);
             return null;

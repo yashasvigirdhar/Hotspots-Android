@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.nomad.projects.yashasvi.hotspotsforwork">
+    package="app.nomad.projects.yashasvi.hotspotsforwork"
+    android:versionCode="1"
+    android:versionName="1">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MyApplication"
@@ -16,7 +19,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/MyMaterialTheme">
-        <activity android:name=".activities.CitySelectionActivity">
+        <activity
+            android:name=".activities.CitySelectionActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -44,6 +49,7 @@
         </activity>
         <activity
             android:name=".activities.PlaceViewActivity"
+            android:launchMode="singleTop"
             android:parentActivityName=".activities.PlacesListActivity">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -61,6 +67,7 @@
         <activity android:name=".activities.ZomatoWebviewActivity" />
         <activity
             android:name=".activities.PlaceImagesActivity"
+            android:launchMode="singleTop"
             android:parentActivityName=".activities.PlaceViewActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

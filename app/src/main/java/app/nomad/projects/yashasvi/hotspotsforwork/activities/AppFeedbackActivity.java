@@ -1,5 +1,6 @@
 package app.nomad.projects.yashasvi.hotspotsforwork.activities;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
@@ -18,20 +19,18 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.AppFeedback;
-import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.Feedback;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 
 public class AppFeedbackActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "AppFeedbackActivity";
+
+    final Context mContext = this;
 
     int feeling = -1;
 
@@ -135,53 +134,8 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
         String feedbackMessage = etFeedbackMessage.getText().toString();
         AppFeedback appFeedback = new AppFeedback(feedbackName, feedbackEmail, feedbackMessage, String.valueOf(feeling));
         String jsonString = new Gson().toJson(appFeedback);
-        TestAsyncTask testAsyncTask = new TestAsyncTask(jsonString);
-        testAsyncTask.execute();
-    }
-
-
-    public int postJSON(String jsonData) {
-        int status = 0;
-        HttpURLConnection connection = null;
-        try {
-            URL u = new URL(ServerConstants.SERVER_URL + ServerConstants.APP_FEEDBACK_PATH);
-            connection = (HttpURLConnection) u.openConnection();
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            connection.setUseCaches(false);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("charset", "utf-8");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.connect();
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(jsonData);
-            wr.flush();
-            wr.close();
-            status = connection.getResponseCode();
-            Log.i(TAG, "status : " + status);
-            InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            String line;
-            StringBuilder response = new StringBuilder();
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\r');
-            }
-            rd.close();
-
-
-        } catch (Exception ex) {
-            Log.e(TAG, ex.toString());
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.disconnect();
-                } catch (Exception ex) {
-                    //disconnect error
-                }
-            }
-        }
-        return status;
+        SendFeedbackAsyncTask sendFeedbackAsyncTask = new SendFeedbackAsyncTask(jsonString);
+        sendFeedbackAsyncTask.execute();
     }
 
     @Override
@@ -227,26 +181,27 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
     }
 
 
-    public class TestAsyncTask extends AsyncTask<Void, Void, Integer> {
+    public class SendFeedbackAsyncTask extends AsyncTask<Void, Void, String> {
         private String jsonData;
 
-        public TestAsyncTask(String jsonString) {
+        public SendFeedbackAsyncTask(String jsonString) {
             jsonData = jsonString;
         }
 
         @Override
-        protected Integer doInBackground(Void... params) {
-            return postJSON(jsonData);
+        protected String doInBackground(Void... params) {
+            return ServerHelperFunctions.postJSON(jsonData, Feedback.APP);
         }
 
         @Override
-        protected void onPostExecute(Integer responseFromServer) {
+        protected void onPostExecute(String responseFromServer) {
             super.onPostExecute(responseFromServer);
             Log.i(TAG, String.valueOf(responseFromServer));
-            if (responseFromServer == HttpURLConnection.HTTP_OK)
+            if (Integer.parseInt(responseFromServer) == HttpURLConnection.HTTP_OK) {
+                Toast.makeText(mContext, "Thanks! Your feedback has been submitted", Toast.LENGTH_SHORT).show();
                 finish();
-            else {
-                //TODO : show error message
+            } else {
+                Toast.makeText(mContext, responseFromServer, Toast.LENGTH_SHORT).show();
             }
 
         }

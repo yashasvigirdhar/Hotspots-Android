@@ -23,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -38,13 +39,14 @@ import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlacesRecyclerViewAd
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.LocationHelper;
-import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 
 
-public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener {
+public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener {
 
     final public static String LOG_TAG = "PlacesListActivity";
-    String city;
+    String city = "";
+    boolean throughOnCreate;
 
 
     private RecyclerView mRecyclerView;
@@ -61,36 +63,32 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         Log.i(LOG_TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_places);
-        handleIntent(getIntent());
+        Intent callingIntent = getIntent();
+        if (callingIntent != null && callingIntent.getStringExtra("city") != null)
+            city = callingIntent.getStringExtra("city");
         initialize();
         getPlaces();
     }
 
     private void getPlaces() {
-        new GetPlacesAsyncTask(UtilFunctions.getPlacesUrlByCity(city)).execute();
+        new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity(city)).execute();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Log.i(LOG_TAG, "onNewIntent");
-        setIntent(intent);
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        Log.i(LOG_TAG, "handleIntent");
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             Log.i(LOG_TAG, "search intent");
             String query = intent.getStringExtra(SearchManager.QUERY);
             Log.i(LOG_TAG, "query : " + query);
-
             if (query.isEmpty())
                 mAdapter.flushFilter();
             mAdapter.setFilter(query);
-        } else {
-            city = intent.getStringExtra("city");
+            return;
         }
+        if (places == null)
+            getPlaces();
     }
 
     private void initialize() {
@@ -108,6 +106,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new PlacesRecyclerViewAdapter(places, distances, this);
+        mAdapter.setOnPlaceClickedListener(this);
         mRecyclerView.setAdapter(mAdapter);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -137,6 +136,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     @Override
     public void onLocationChanged(Location location) {
         locationHelper.setLocation(location);
+        // Toast.makeText(this, "Calculating distance of places from here", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -160,6 +160,13 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         calculatePlacesDistance();
     }
 
+    @Override
+    public void onPlaceClicked(int position, View v) {
+        Intent i = new Intent(this, PlaceViewActivity.class);
+        i.putExtra("place", places.get(position));
+        startActivity(i);
+    }
+
     public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {
 
         private String mUrl;
@@ -171,7 +178,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         @Override
         protected String doInBackground(Void... params) {
             String resultString;
-            resultString = UtilFunctions.getJSON(mUrl);
+            resultString = ServerHelperFunctions.getJSON(mUrl);
             return resultString;
         }
 
@@ -217,6 +224,9 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        MenuItem shareItem = menu.findItem(R.id.action_share);
+        shareItem.setVisible(false);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
@@ -269,7 +279,6 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.REQUEST_CODE_INTENT_GPS_SETTINGS) {
-            Toast.makeText(this, "Calculating distance of places from here", Toast.LENGTH_SHORT).show();
             locationHelper.updateIsGpsEnabled();
             locationHelper.initiateLocationProcess();
 

@@ -34,11 +34,17 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
     private List<Place> all_Places;
     private List<Float> distances;
 
+    public static OnPlaceClickedListener onPlaceClickedListener;
+
     public PlacesRecyclerViewAdapter(List<Place> myDataset, List<Float> distances, Context mContext) {
         this.mDataset = myDataset;
         this.all_Places = myDataset;
         this.distances = distances;
         this.mContext = mContext;
+    }
+
+    public void setOnPlaceClickedListener(OnPlaceClickedListener onPlaceClickedListener) {
+        this.onPlaceClickedListener = onPlaceClickedListener;
     }
 
     @Override
@@ -131,7 +137,7 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         }
     }
 
-    public static class DataObjectHolder extends RecyclerView.ViewHolder {
+    public static class DataObjectHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tvPlaceName, tvPlaceArea, tvPlaceDistance, tvPlaceCost, tvPlaceRating;
         LinearLayout llNavigate, llCall;
 
@@ -144,6 +150,13 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
             tvPlaceRating = (TextView) itemView.findViewById(R.id.tvPlaceRating);
             llNavigate = (LinearLayout) itemView.findViewById(R.id.llPlaceCardNavigate);
             llCall = (LinearLayout) itemView.findViewById(R.id.llPlaceCardCall);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            onPlaceClickedListener.onPlaceClicked(getAdapterPosition(),v);
         }
     }
 
@@ -186,4 +199,7 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         notifyDataSetChanged();
     }
 
+    public interface OnPlaceClickedListener {
+        void onPlaceClicked(int position, View v);
+    }
 }

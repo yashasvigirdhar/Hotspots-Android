@@ -1,8 +1,10 @@
 package app.nomad.projects.yashasvi.hotspotsforwork.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,11 +25,15 @@ import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.CitiesRecyclerViewAdapter;
 import app.nomad.projects.yashasvi.hotspotsforwork.fragments.FragmentDrawer;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
 
 public class CitySelectionActivity extends AppCompatActivity implements CitiesRecyclerViewAdapter.MyClickListener, FragmentDrawer.FragmentDrawerListener {
 
     final public static String LOG_TAG = "CitySelectionActivity";
+
+    final int REQUEST_CODE = 1;
 
     private RecyclerView mRecyclerView;
     private CitiesRecyclerViewAdapter mAdapter;
@@ -38,12 +44,51 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_cities);
-        initialize();
-        getCities();
+
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(this);
+
+
+        switch (UtilFunctions.checkAppStart(this, sharedPreferences)) {
+            case NORMAL:
+                // find out which city has been selected previously and proceed to places activity
+                String city = sharedPreferences.getString(
+                        Constants.SELECTED_CITY, "city");
+                goToPlacesActivity(city);
+                break;
+            case FIRST_TIME_VERSION:
+                // TODO show what's new
+                break;
+            case FIRST_TIME:
+                initialize();
+                getCities();
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(places == null) {
+            initialize();
+            getCities();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if(places == null) {
+            initialize();
+            getCities();
+        }
+
     }
 
     private void getCities() {
-        new GetPlacesAsyncTask(UtilFunctions.getPlacesUrlByCity("city")).execute();
+        new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity("city")).execute();
     }
 
     void initialize() {
@@ -91,11 +136,19 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
 
     @Override
     public void onItemClick(int position, View v) {
-        Intent i = new Intent(this, PlacesListActivity.class);
-        i.putExtra("city", places.get(position).getName());
-        startActivity(i);
+        String city = places.get(position).getName();
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        sharedPreferences.edit()
+                .putString(Constants.SELECTED_CITY, city).commit();
+        goToPlacesActivity(city);
     }
 
+    public void goToPlacesActivity(String city) {
+        Intent i = new Intent(this, PlacesListActivity.class);
+        i.putExtra("city", city);
+        startActivity(i);
+    }
 
     public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {
 
@@ -107,7 +160,7 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
 
         @Override
         protected String doInBackground(Void... params) {
-            return UtilFunctions.getJSON(mUrl);
+            return ServerHelperFunctions.getJSON(mUrl);
         }
 
         @Override
@@ -117,11 +170,12 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
             Type collectionType = new TypeToken<List<Place>>() {
             }.getType();
             try {
-                places = new Gson().fromJson(jsonString, collectionType);
-                for (int i = 0; i < places.size(); i++)
-                    Log.i(LOG_TAG, places.get(i).toString());
-                mAdapter = new CitiesRecyclerViewAdapter(places);
-                mRecyclerView.setAdapter(mAdapter);
+                List<Place> tempPlaces = new Gson().fromJson(jsonString, collectionType);
+                for (int i = 0; i < tempPlaces.size(); i++) {
+                    Log.i(LOG_TAG, tempPlaces.get(i).toString());
+                    places.add(tempPlaces.get(i));
+                }
+                mAdapter.notifyDataSetChanged();
             } catch (JsonSyntaxException e) {
                 //not able to parse response, after requesting all places
             }

@@ -8,7 +8,7 @@
     <android.support.design.widget.AppBarLayout
         android:id="@+id/my_appbar_container"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="250dp"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -93,15 +93,17 @@
                                 android:layout_height="wrap_content"
                                 android:padding="5dp"
                                 android:text="PHONE NO"
+                                android:textSize="17sp"
                                 android:textAllCaps="true"
-                                android:textStyle="bold" />
+                                android:fontFamily="sans-serif-black"/>
 
                             <TextView
                                 android:id="@+id/tvPlacePhoneValue"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:padding="5dp"
-                                android:text="8143914414" />
+                                android:text="8143914414"
+                                android:fontFamily="sans-serif-medium"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -111,11 +113,13 @@
 
                             <ImageButton
                                 android:id="@+id/ibCallPlace"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
+                                android:layout_width="35dp"
+                                android:layout_height="35dp"
+                                android:layout_marginLeft="30dp"
+                                android:layout_gravity="center_vertical"
                                 android:background="@android:color/transparent"
                                 android:padding="5dp"
-                                android:src="@mipmap/ic_la" />
+                                android:src="@drawable/phone36" />
 
                         </LinearLayout>
 
@@ -157,8 +161,10 @@
 
                             <ImageButton
                                 android:id="@+id/ibNavigateToPlace"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
+                                android:layout_width="35dp"
+                                android:layout_height="35dp"
+                                android:layout_marginLeft="30dp"
+                                android:layout_gravity="center_vertical"
                                 android:background="@android:color/transparent"
                                 android:padding="5dp"
                                 android:src="@mipmap/ic_navigation" />
@@ -180,7 +186,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="5dp">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -217,23 +224,27 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:paddingBottom="8dp">
 
                         <TextView
                             android:id="@+id/tvAmbianceKey"
                             android:layout_width="wrap_content"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:padding="5dip"
+                            android:padding="5dp"
+                            android:paddingBottom="2dp"
                             android:text="Ambiance"
                             android:textAllCaps="true"
-                            android:textStyle="bold" />
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
 
                         <TextView
                             android:id="@+id/tvAmbianceValue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="5dp"
+                            android:textSize="14sp"
                             android:text="Peaceful, Very less crowd" />
                     </LinearLayout>
 
@@ -393,13 +404,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
-                    android:padding="5dp">
+                    android:padding="5dp"
+                    android:paddingBottom="0dp"
+                    android:paddingTop="0dp">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0.8"
+                        android:padding="5dp"
+                        android:paddingBottom="0dp"
+                        android:paddingTop="0dp"
                         android:text="VIEW ON ZOMATO"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:textStyle="bold" />
@@ -410,6 +426,9 @@
                         android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0.2"
+                        android:padding="5dp"
+                        android:paddingBottom="0dp"
+                        android:paddingTop="0dp"
                         android:src="@drawable/right_arrow" />
                 </LinearLayout>
 
@@ -435,6 +454,8 @@
                         android:padding="5dp"
                         android:text="Description"
                         android:textAllCaps="true"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif-black"
                         android:textStyle="bold" />
 
                     <TextView
@@ -442,6 +463,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="5dp"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif-medium"
                         android:text="A very small cafe, having a capacity of up to 15 people. This place is located in Koramangala 7th block, just opposite to Forum mall. It has been designed very carefully, specially the walls and elements such as sticky notes and small mirrors  add to it's beauty. The place opens early in the morning around 9 am and offers a good variety of breakfast options. Other than that, food menu mainly contains pasta, sandwiches, pancakes and noodles  along this some shakes and juices.
 \n\nThe place is usually not crowded which leads to :
 - wifi speed being very good

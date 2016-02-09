@@ -4,6 +4,7 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ImageMemoryCache;
 
 /**
@@ -28,6 +29,21 @@ public class MyApplication extends Application {
         cacheSize = maxMemory / 8;
 
         mMemoryCache = new ImageMemoryCache(cacheSize);
+
+        populateConstants();
+    }
+
+    private void populateConstants() {
+        Constants.wifiSpeedLevel.put(1,"Slow surfing");
+        Constants.wifiSpeedLevel.put(2,"Good for surfing");
+        Constants.wifiSpeedLevel.put(3,"Surfing + images/videos");
+        Constants.wifiSpeedLevel.put(4,"Video calls  + HQ videos");
+        Constants.wifiSpeedLevel.put(5,"No need to worry");
+
+        Constants.chargingPointsLevel.put(1,"Very less");
+        Constants.chargingPointsLevel.put(2,"Can find, but not easy");
+        Constants.chargingPointsLevel.put(3,"No need to worry");
+
     }
 
     public void putBitmapInCache(String key, Bitmap bt) {

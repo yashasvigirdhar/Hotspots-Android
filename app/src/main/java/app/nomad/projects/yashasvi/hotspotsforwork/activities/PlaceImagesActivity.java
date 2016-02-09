@@ -1,11 +1,13 @@
 package app.nomad.projects.yashasvi.hotspotsforwork.activities;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -14,13 +16,15 @@ import java.util.List;
 import app.nomad.projects.yashasvi.hotspotsforwork.MyApplication;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlaceImagesRecyclerViewAdapter;
-import app.nomad.projects.yashasvi.hotspotsforwork.utils.ImageSize;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageSize;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
-import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 
 public class PlaceImagesActivity extends AppCompatActivity {
 
     private static final String TAG = "PlaceImageActivity";
+
+    Toolbar toolbar;
 
     String placeId;
     String placeName;
@@ -48,10 +52,10 @@ public class PlaceImagesActivity extends AppCompatActivity {
         imagesPath = getIntent().getStringExtra("images_path");
 
 
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarPlaceImages);
-        //setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setTitle(placeName);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarPlaceImage);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(placeName);
 
         placeImagesRecyclerView = (RecyclerView) findViewById(R.id.rvPlaceImages);
 
@@ -68,7 +72,7 @@ public class PlaceImagesActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            if(imagesCount == -1) {
+            if (imagesCount == -1) {
                 return null;
             }
 
@@ -77,10 +81,10 @@ public class PlaceImagesActivity extends AppCompatActivity {
                 path = imagesPath + ServerConstants.THUMBNAILS_PATH + "/" + placeName + i + ".png";
                 path = path.replace(" ", "%20");
                 Log.i(TAG, path);
-                Bitmap bt = ((MyApplication) getApplication()).getBitmapFromCache(UtilFunctions.getImageCacheKey(placeId, i, ImageSize.THUMBNAIL));
+                Bitmap bt = ((MyApplication) getApplication()).getBitmapFromCache(ServerHelperFunctions.getImageCacheKey(placeId, i, ImageSize.THUMBNAIL));
                 if (bt == null) {
                     Log.i(TAG, "bitmap not present in cache " + i);
-                    bt = UtilFunctions.downloadBitmapFromUrl(path);
+                    bt = ServerHelperFunctions.downloadBitmapFromUrl(path);
                 }
                 publishProgress(bt, i);
             }
@@ -97,10 +101,13 @@ public class PlaceImagesActivity extends AppCompatActivity {
             placeImageBitmaps.add(bitmap);
             placeImagesRecyclerViewAdapter.notifyDataSetChanged();
             placeImagesRecyclerViewAdapter.updateImagesCount(imagesCount);
-            ((MyApplication) getApplication()).putBitmapInCache(UtilFunctions.getImageCacheKey(placeId, number, ImageSize.THUMBNAIL), bitmap);
+            ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(placeId, number, ImageSize.THUMBNAIL), bitmap);
         }
 
     }
 
-
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
 }

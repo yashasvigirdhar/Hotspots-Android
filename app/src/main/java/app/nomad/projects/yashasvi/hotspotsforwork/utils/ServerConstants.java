@@ -5,7 +5,7 @@ package app.nomad.projects.yashasvi.hotspotsforwork.utils;
  */
 public class ServerConstants {
 
-    final public static String SERVER_URL = "http://192.168.0.126:8080/findplace/";
+    final public static String SERVER_URL = "http://128.199.91.127:8080/findplace/";
     final public static String REST_API_PATH = "api/";
     final public static String CITY_PATH = "places/city/";
     final public static String ID_PATH = "places/id";
