@@ -14,7 +14,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +26,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -36,13 +40,14 @@ import java.util.List;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlacesRecyclerViewAdapter;
+import app.nomad.projects.yashasvi.hotspotsforwork.fragments.FragmentDrawer;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.LocationHelper;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 
 
-public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener {
+public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener, View.OnClickListener, FragmentDrawer.FragmentDrawerListener {
 
     final public static String LOG_TAG = "PlacesListActivity";
     String city = "";
@@ -92,11 +97,23 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     }
 
     private void initialize() {
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbarPlacesList);
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(city);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+
+        LinearLayout toolbarTitle = (LinearLayout) mToolbar.findViewById(R.id.ll_toolbar_title);
+        TextView title = (TextView) toolbarTitle.findViewById(R.id.tv_toolbar_title);
+        title.setText(city);
+        toolbarTitle.setOnClickListener(this);
+
+        FragmentDrawer drawerFragment = (FragmentDrawer)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
+        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
+        drawerFragment.setDrawerListener(this);
 
         places = new ArrayList<>();
         distances = new ArrayList<>();
@@ -165,6 +182,36 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         Intent i = new Intent(this, PlaceViewActivity.class);
         i.putExtra("place", places.get(position));
         startActivity(i);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.ll_toolbar_title:
+                //Toast.makeText(PlacesListActivity.this, "clicked", Toast.LENGTH_SHORT).show();
+                NavUtils.navigateUpFromSameTask(this);
+                break;
+        }
+    }
+
+    @Override
+    public void onDrawerItemSelected(View view, int position) {
+        Intent i;
+        switch (position) {
+            case 0:
+                i = new Intent(this, AboutMeActivity.class);
+                startActivity(i);
+                break;
+            case 1:
+                i = new Intent(this, AppFeedbackActivity.class);
+                startActivity(i);
+                break;
+            case 2:
+                i = new Intent(this, SuggestNewPlaceActivity.class);
+                startActivity(i);
+                break;
+
+        }
     }
 
     public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {

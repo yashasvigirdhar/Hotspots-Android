@@ -16,7 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.enums.Feedback;
-import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageSize;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
 
 /**
  * Created by yashasvi on 1/31/16.
@@ -25,7 +25,7 @@ public class ServerHelperFunctions {
 
     private static final String LOG_TAG = "ServerHelperFunctions";
 
-    public static String getImageCacheKey(String place_id, int number, ImageSize size) {
+    public static String getImageCacheKey(String place_id, int number, ImageType size) {
         String key = "";
         key += place_id;
         key += "&";

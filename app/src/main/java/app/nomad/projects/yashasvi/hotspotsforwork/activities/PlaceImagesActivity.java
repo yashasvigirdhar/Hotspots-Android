@@ -16,7 +16,7 @@ import java.util.List;
 import app.nomad.projects.yashasvi.hotspotsforwork.MyApplication;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlaceImagesRecyclerViewAdapter;
-import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageSize;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 
@@ -46,8 +46,8 @@ public class PlaceImagesActivity extends AppCompatActivity {
     }
 
     void initialize() {
-        placeId = getIntent().getStringExtra("placeId");
-        placeName = getIntent().getStringExtra("placeName");
+        placeId = getIntent().getStringExtra("place_id");
+        placeName = getIntent().getStringExtra("place_name");
         imagesCount = getIntent().getIntExtra("images_count", -1);
         imagesPath = getIntent().getStringExtra("images_path");
 
@@ -81,7 +81,7 @@ public class PlaceImagesActivity extends AppCompatActivity {
                 path = imagesPath + ServerConstants.THUMBNAILS_PATH + "/" + placeName + i + ".png";
                 path = path.replace(" ", "%20");
                 Log.i(TAG, path);
-                Bitmap bt = ((MyApplication) getApplication()).getBitmapFromCache(ServerHelperFunctions.getImageCacheKey(placeId, i, ImageSize.THUMBNAIL));
+                Bitmap bt = ((MyApplication) getApplication()).getBitmapFromCache(ServerHelperFunctions.getImageCacheKey(placeId, i, ImageType.THUMBNAIL));
                 if (bt == null) {
                     Log.i(TAG, "bitmap not present in cache " + i);
                     bt = ServerHelperFunctions.downloadBitmapFromUrl(path);
@@ -101,7 +101,7 @@ public class PlaceImagesActivity extends AppCompatActivity {
             placeImageBitmaps.add(bitmap);
             placeImagesRecyclerViewAdapter.notifyDataSetChanged();
             placeImagesRecyclerViewAdapter.updateImagesCount(imagesCount);
-            ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(placeId, number, ImageSize.THUMBNAIL), bitmap);
+            ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(placeId, number, ImageType.THUMBNAIL), bitmap);
         }
 
     }

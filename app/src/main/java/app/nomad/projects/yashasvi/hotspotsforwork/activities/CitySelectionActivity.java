@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,13 +22,12 @@ import java.util.List;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.CitiesRecyclerViewAdapter;
-import app.nomad.projects.yashasvi.hotspotsforwork.fragments.FragmentDrawer;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
 
-public class CitySelectionActivity extends AppCompatActivity implements CitiesRecyclerViewAdapter.MyClickListener, FragmentDrawer.FragmentDrawerListener {
+public class CitySelectionActivity extends AppCompatActivity implements CitiesRecyclerViewAdapter.MyClickListener {
 
     final public static String LOG_TAG = "CitySelectionActivity";
 
@@ -70,8 +68,9 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
 
     @Override
     protected void onResume() {
+        Log.i(LOG_TAG, "onResume");
         super.onResume();
-        if(places == null) {
+        if (places == null) {
             initialize();
             getCities();
         }
@@ -79,8 +78,9 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
 
     @Override
     protected void onNewIntent(Intent intent) {
+        Log.i(LOG_TAG, "onNewIntent");
         super.onNewIntent(intent);
-        if(places == null) {
+        if (places == null) {
             initialize();
             getCities();
         }
@@ -96,11 +96,6 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle(R.string.select_city);
 
-        FragmentDrawer drawerFragment = (FragmentDrawer)
-                getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
-        drawerFragment.setDrawerListener(this);
-
         places = new ArrayList<>();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerViewCities);
@@ -112,26 +107,6 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
 
         mAdapter.setOnItemClickListener(this);
 
-    }
-
-    @Override
-    public void onDrawerItemSelected(View view, int position) {
-        Intent i;
-        switch (position) {
-            case 0:
-                i = new Intent(this, AboutMeActivity.class);
-                startActivity(i);
-                break;
-            case 1:
-                i = new Intent(this, AppFeedbackActivity.class);
-                startActivity(i);
-                break;
-            case 2:
-                i = new Intent(this, SuggestNewPlaceActivity.class);
-                startActivity(i);
-                break;
-
-        }
     }
 
     @Override

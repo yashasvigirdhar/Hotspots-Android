@@ -30,7 +30,7 @@ import java.util.List;
 import app.nomad.projects.yashasvi.hotspotsforwork.MyApplication;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.FullScreenPlaceImageAdapter;
-import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageSize;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
@@ -105,13 +105,13 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         Bitmap bt;
         String key;
         for (int i = 0; i < imagesCount; i++) {
-            key = ServerHelperFunctions.getImageCacheKey(placeId, i, ImageSize.FULL);
+            key = ServerHelperFunctions.getImageCacheKey(placeId, i, ImageType.FULL);
             bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
             if (bt != null) {
                 placeImageBitmaps.add(bt);
                 Log.i(LOG_TAG, "adding full size image from cache " + i);
             } else {
-                key = ServerHelperFunctions.getImageCacheKey(placeId, i, ImageSize.THUMBNAIL);
+                key = ServerHelperFunctions.getImageCacheKey(placeId, i, ImageType.THUMBNAIL);
                 bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
                 if (bt != null) {
                     placeImageBitmaps.add(bt);
@@ -137,12 +137,12 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
-        checkPermissionAndShareImage();
+        checkAndRequestPermissionsForSharingImage();
         // Return true to display menu
         return true;
     }
 
-    void checkPermissionAndShareImage() {
+    void checkAndRequestPermissionsForSharingImage() {
         int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         Log.i(LOG_TAG, "external storage write permission : " + permission);
         if (permission != PackageManager.PERMISSION_GRANTED) {
@@ -154,14 +154,17 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
             );
             return;
         }
-        shareImage();
     }
 
-    void shareImage() {
+    void setShareImageReady() {
         try {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             currentBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
             File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
+            if (f.exists()) {
+                f.delete();
+                Log.i(LOG_TAG, "deleting previous file");
+            }
             f.createNewFile();
             FileOutputStream fo = new FileOutputStream(f);
             fo.write(bytes.toByteArray());
@@ -192,11 +195,12 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         Log.i(LOG_TAG, "page selected " + pos);
         position = pos;
         Bitmap bt;
-        String key = ServerHelperFunctions.getImageCacheKey(placeId, position, ImageSize.FULL);
+        String key = ServerHelperFunctions.getImageCacheKey(placeId, position, ImageType.FULL);
         bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
         if (bt != null) {
             currentBitmap = bt;
-            checkPermissionAndShareImage();
+            //checkAndRequestPermissionsForSharingImage();
+            setShareImageReady();
             invalidateOptionsMenu();
             Log.i(LOG_TAG, "cache hit \\m/\nalready contains full size image");
             return;
@@ -224,7 +228,8 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         @Override
         protected Void doInBackground(Void... params) {
             Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(url);
-            publishProgress(bt);
+            if (bt != null)
+                publishProgress(bt);
             return null;
         }
 
@@ -232,7 +237,7 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         protected void onProgressUpdate(Bitmap... bitmaps) {
             super.onProgressUpdate(bitmaps[0]);
             updateImageToFullSize(bitmaps[0]);
-            ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(placeId, position, ImageSize.FULL), bitmaps[0]);
+            ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(placeId, position, ImageType.FULL), bitmaps[0]);
         }
     }
 
@@ -241,7 +246,8 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         placeImageBitmaps.set(position, bitmap);
         mAdapter.notifyDataSetChanged();
         currentBitmap = bitmap;
-        checkPermissionAndShareImage();
+        //checkAndRequestPermissionsForSharingImage();
+        setShareImageReady();
         invalidateOptionsMenu();
     }
 
@@ -251,9 +257,8 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         switch (requestCode) {
             case REQUEST_EXTERNAL_STORAGE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    shareImage();
                 } else {
-                    Toast.makeText(this, "You have to grant permissions in order to show distance", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "You have to grant access to external storage directory in order to share images with others", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:

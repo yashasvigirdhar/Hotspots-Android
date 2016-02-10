@@ -10,6 +10,8 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -29,12 +31,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
+import app.nomad.projects.yashasvi.hotspotsforwork.MyApplication;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
+import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlaceSmallImagesRecyclerViewAdapter;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.Place;
 import app.nomad.projects.yashasvi.hotspotsforwork.models.PlaceImages;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
 
 public class PlaceViewActivity extends AppCompatActivity implements View.OnClickListener {
@@ -45,6 +53,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
     int imagesCount = -1;
     String imagesPath = "";
+
+    CollapsingToolbarLayout collapsing_container;
+    Toolbar toolbar;
 
     ImageView ivPlaceCover;
 
@@ -57,12 +68,12 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     TextView tvChargingPoints;
     TextView tvPhone;
 
-    CollapsingToolbarLayout collapsing_container;
-    Toolbar toolbar;
-
     CardView cvFood;
-    CardView cvPhotos;
+    //CardView cvPhotos;
 
+    RecyclerView recyclerViewsmallImages;
+    PlaceSmallImagesRecyclerViewAdapter mAdapter;
+    List<Bitmap> smallImageBitmaps;
 
     ImageButton ibCallPlace, ibNavigateToPlace;
     Button bGoToFeedbackScreen;
@@ -101,8 +112,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
         cvFood = (CardView) findViewById(R.id.cv_placeFood);
         cvFood.setOnClickListener(this);
-        cvPhotos = (CardView) findViewById(R.id.cv_placePhotos);
-        cvPhotos.setOnClickListener(this);
+        //cvPhotos = (CardView) findViewById(R.id.cv_placePhotos);
+        //cvPhotos.setOnClickListener(this);
+
+        smallImageBitmaps = new ArrayList<>();
+        recyclerViewsmallImages = (RecyclerView) findViewById(R.id.recyclerViewPhotosPlaceViewPage);
 
         tvAddress = (TextView) findViewById(R.id.tvPlaceAddressValue);
         tvPhone = (TextView) findViewById(R.id.tvPlacePhoneValue);
@@ -124,7 +138,16 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void populate() {
+
+        recyclerViewsmallImages = (RecyclerView) findViewById(R.id.recyclerViewPhotosPlaceViewPage);
+        //recyclerViewsmallImages.setHasFixedSize(true);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
+        recyclerViewsmallImages.setLayoutManager(mLayoutManager);
+        mAdapter = new PlaceSmallImagesRecyclerViewAdapter(this, smallImageBitmaps, String.valueOf(place.getId()), place.getName());
+        recyclerViewsmallImages.setAdapter(mAdapter);
+
         collapsing_container.setTitle(place.getName());
+
         tvAddress.setText(place.getAddress());
         tvAmbiance.setText(String.valueOf(place.getAmbiance()));
         tvService.setText(String.valueOf(place.getService()));
@@ -145,16 +168,16 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.cv_placePhotos:
                 i = new Intent(this, PlaceImagesActivity.class);
-                i.putExtra("placeId", place.getId().toString());
-                i.putExtra("placeName", place.getName());
+                i.putExtra("place_id", place.getId().toString());
+                i.putExtra("place_name", place.getName());
                 i.putExtra("images_count", imagesCount);
                 i.putExtra("images_path", imagesPath);
                 startActivity(i);
                 break;
             case R.id.ivPlaceCover:
                 i = new Intent(this, PlaceImagesActivity.class);
-                i.putExtra("placeId", place.getId().toString());
-                i.putExtra("placeName", place.getName());
+                i.putExtra("place_id", place.getId().toString());
+                i.putExtra("place_name", place.getName());
                 i.putExtra("images_count", imagesCount);
                 i.putExtra("images_path", imagesPath);
                 startActivity(i);
@@ -268,20 +291,49 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
             if (placeImages == null)
                 return null;
             imagesCount = placeImages.getCount();
+            mAdapter.updateImagesCount(imagesCount);
+
             imagesPath = placeImages.getPath();
+            mAdapter.updateImagesPath(imagesPath);
+
             String coverImageUrl = ServerHelperFunctions.getPlaceCoverImageUrl(imagesPath, place.getName());
             Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(coverImageUrl);
             if (bt != null)
-                publishProgress(bt);
+                publishProgress(bt, ImageType.COVER);
+
+            String path;
+            for (int i = 1; i < 5; i++) {
+                path = imagesPath + ServerConstants.THUMBNAILS_PATH + "/" + place.getName() + i + ".png";
+                path = path.replace(" ", "%20");
+                Log.i(TAG, path);
+                bt = ((MyApplication) getApplication()).getBitmapFromCache(ServerHelperFunctions.getImageCacheKey(String.valueOf(place.getId()), i, ImageType.THUMBNAIL));
+                if (bt == null) {
+                    Log.i(TAG, "bitmap not present in cache " + i);
+                    bt = ServerHelperFunctions.downloadBitmapFromUrl(path);
+                }
+                if (bt != null) {
+                    publishProgress(bt, ImageType.SMALL);
+                    ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(String.valueOf(place.getId()), i, ImageType.THUMBNAIL), bt);
+                }
+            }
             return null;
         }
 
         @Override
         protected void onProgressUpdate(Object... values) {
             super.onProgressUpdate(values);
-            ivPlaceCover.setImageBitmap((Bitmap) values[0]);
-            ivPlaceCover.setOnClickListener(PlaceViewActivity.this);
-//            ivPlaceCover.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_IN);
+            Log.i(TAG, "onProgressUpdate");
+            ImageType type = (ImageType) values[1];
+            if (type == ImageType.COVER) {
+                ivPlaceCover.setImageBitmap((Bitmap) values[0]);
+                ivPlaceCover.setOnClickListener(PlaceViewActivity.this);
+            } else if (type == ImageType.SMALL) {
+                Log.i(TAG, "adding small image");
+                smallImageBitmaps.add((Bitmap) values[0]);
+                //mAdapter = new PlaceSmallImagesRecyclerViewAdapter(PlaceViewActivity.this, smallImageBitmaps, String.valueOf(place.getId()), place.getName());
+                //recyclerViewsmallImages.setAdapter(mAdapter);
+                mAdapter.notifyDataSetChanged();
+            }
         }
     }
 }
