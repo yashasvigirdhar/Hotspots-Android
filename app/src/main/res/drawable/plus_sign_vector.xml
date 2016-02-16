@@ -1,21 +1,22 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="50dp"
-    android:height="60dp"
+    android:height="50dp"
     android:viewportHeight="100"
     android:viewportWidth="100">
 
     <path
         android:name="mouth"
-        android:pathData="M 10,50 Q 20,60 20,60"
-        android:strokeColor="@android:color/black"
+        android:pathData="M 12.999,33 L 13,53"
+        android:strokeColor="?attr/colorPrimary"
         android:strokeLineCap="round"
-        android:strokeWidth="4" />
+        android:strokeWidth="3" />
 
     <path
         android:name="mouth"
-        android:pathData="M 20,60 Q 30,50 30,50"
-        android:strokeColor="@android:color/black"
+        android:pathData="M 3,43 L 23,42.999"
+        android:strokeColor="?attr/colorPrimary"
         android:strokeLineCap="round"
-        android:strokeWidth="4" />
+        android:strokeWidth="3" />
+
 
 </vector>

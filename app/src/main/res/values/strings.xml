@@ -79,4 +79,5 @@
     <string name="send_feedback_button">Send Feedback</string>
     <string name="dummy_address">411, NS Centre, 7th Block, C Cross, 1st Main, Behind Vodafone Showroom, Koramangala 7th Block</string>
     <string name="cost_per_person">"Cost per person : Rs. "</string>
+    <string name="wifi">Wifi</string>
 </resources>

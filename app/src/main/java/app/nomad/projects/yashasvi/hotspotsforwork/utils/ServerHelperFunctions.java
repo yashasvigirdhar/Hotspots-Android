@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.enums.Feedback;
-import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
 
 /**
  * Created by yashasvi on 1/31/16.
@@ -25,27 +24,16 @@ public class ServerHelperFunctions {
 
     private static final String LOG_TAG = "ServerHelperFunctions";
 
-    public static String getImageCacheKey(String place_id, int number, ImageType size) {
-        String key = "";
-        key += place_id;
-        key += "&";
-        key += String.valueOf(number);
-        key += "&";
-        key += String.valueOf(size);
-        return key;
-    }
-
-    public static String getPlaceImagesObjectUrl(int placeId) {
-        return ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.IMAGES_PATH + placeId;
-    }
-
     public static String getPlacesUrlByCity(String city) {
         return ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.CITY_PATH + city;
     }
 
+    public static String getTimingsUriFromId(String id){
+        return ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.TIMINGS_BY_ID + id;
+    }
 
     public static String getPlaceCoverImageUrl(String imagesPath, String placeName) {
-        String url = imagesPath + "/" + ServerConstants.COVER_PATH + "/" +
+        String url = imagesPath + ServerConstants.PLACE_PATH + ServerConstants.COVER_PATH +
                 placeName + ".png";
         url = url.replace(" ", "%20");
         return url;

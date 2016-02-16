@@ -25,6 +25,9 @@ public class Place implements Parcelable {
     String chargingPoints;
     String description;
     String zomatoUrl;
+    String imagesPath;
+
+    int imagesCount, menuImagesCount;
 
     public Place(Integer id, String name, String address, String city, String latitude, String longitude, String phoneNumber,
                  String rating, String cost, String wifispeed, String wifipaid, String service, String ambiance, String food, String charingpoints,
@@ -48,6 +51,29 @@ public class Place implements Parcelable {
         this.zomatoUrl = zomatoUrl;
     }
 
+    public String getImagesPath() {
+        return imagesPath;
+    }
+
+    public void setImagesPath(String imagesPath) {
+        this.imagesPath = imagesPath;
+    }
+
+    public int getImagesCount() {
+        return imagesCount;
+    }
+
+    public void setImagesCount(int imagesCount) {
+        this.imagesCount = imagesCount;
+    }
+
+    public int getMenuImagesCount() {
+        return menuImagesCount;
+    }
+
+    public void setMenuImagesCount(int menuImagesCount) {
+        this.menuImagesCount = menuImagesCount;
+    }
 
     public Integer getId() {
         return id;
@@ -183,11 +209,14 @@ public class Place implements Parcelable {
 
     @Override
     public String toString() {
-        return "Place [name=" + name + ", city=" + city + ", latitude=" + latitude + ", longitude=" + longitude
-                + ", phone=" + phone + ", food=" + food + ", wifiSpeed=" + wifiSpeed + ", wifiPaid=" + wifiPaid
-                + ", ambiance=" + ambiance + ", service=" + service + ", chargingPoints=" + chargingPoints
-                + ", description=" + description + ", zomatoUrl=" + zomatoUrl + "]";
+        return "Place [id=" + id + ", name=" + name + ", address=" + address + ", city=" + city + ", latitude="
+                + latitude + ", longitude=" + longitude + ", phone=" + phone + ", rating=" + rating + ", cost=" + cost
+                + ", food=" + food + ", wifiSpeed=" + wifiSpeed + ", wifiPaid=" + wifiPaid + ", ambiance=" + ambiance
+                + ", service=" + service + ", chargingPoints=" + chargingPoints + ", description=" + description
+                + ", zomatoUrl=" + zomatoUrl + ", imagesPath=" + imagesPath + ", imagesCount=" + imagesCount
+                + ", menuImagesCount=" + menuImagesCount + "]";
     }
+
 
     protected Place(Parcel in) {
         id = in.readByte() == 0x00 ? null : in.readInt();
@@ -207,6 +236,9 @@ public class Place implements Parcelable {
         chargingPoints = in.readString();
         description = in.readString();
         zomatoUrl = in.readString();
+        imagesCount = in.readInt();
+        menuImagesCount = in.readInt();
+        imagesPath = in.readString();
     }
 
     @Override
@@ -238,6 +270,9 @@ public class Place implements Parcelable {
         dest.writeString(chargingPoints);
         dest.writeString(description);
         dest.writeString(zomatoUrl);
+        dest.writeInt(imagesCount);
+        dest.writeInt(menuImagesCount);
+        dest.writeString(imagesPath);
     }
 
     @SuppressWarnings("unused")

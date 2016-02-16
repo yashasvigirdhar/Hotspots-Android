@@ -101,9 +101,9 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        getSupportActionBar().setDisplayUseLogoEnabled(false);
+//        getSupportActionBar().setDisplayShowHomeEnabled(false);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//        getSupportActionBar().setDisplayUseLogoEnabled(false);
 
         LinearLayout toolbarTitle = (LinearLayout) mToolbar.findViewById(R.id.ll_toolbar_title);
         TextView title = (TextView) toolbarTitle.findViewById(R.id.tv_toolbar_title);

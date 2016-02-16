@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,33 +17,37 @@ import app.nomad.projects.yashasvi.hotspotsforwork.activities.FullscreenPlaceIma
 /**
  * Created by yashasvi on 1/15/16.
  */
-public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceImagesRecyclerViewAdapter.PlaceImageRecyclerViewHolder> implements View.OnClickListener {
+public class PlaceMenuSmallImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceMenuSmallImagesRecyclerViewAdapter.PlaceImageRecyclerViewHolder> implements View.OnClickListener {
 
-    private final String LOG_TAG = "ImagesRecyclerAdapter";
+    private final String LOG_TAG = "MenuSmallImageRecyclAdapter";
     Activity mActivity;
     List<Bitmap> imageBitmaps;
     String place_id;
     String place_name;
+
     String imagesPath;
-    int imagesCount;
+
+    int imagesCount = 0;
 
 
-    public PlaceImagesRecyclerViewAdapter(Activity activity, List<Bitmap> bitmaps, String place_id, String place_name, String imagesPath, int imagesCount) {
+    public PlaceMenuSmallImagesRecyclerViewAdapter(Activity activity, List<Bitmap> bitmaps, String place_id, String place_name) {
         this.mActivity = activity;
         this.imageBitmaps = bitmaps;
         this.place_id = place_id;
         this.place_name = place_name;
-        this.imagesCount = imagesCount;
-        this.imagesPath = imagesPath;
     }
 
     public void updateImagesCount(int imagesCount) {
         this.imagesCount = imagesCount;
     }
 
+    public void updateImagesPath(String imagesPath) {
+        this.imagesPath = imagesPath;
+    }
+
     @Override
     public PlaceImageRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.place_image_card, null);
+        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.place_menu_photos_row_card, parent, false);
         return new PlaceImageRecyclerViewHolder(layoutView);
     }
 
@@ -62,19 +65,18 @@ public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceIm
 
     @Override
     public void onClick(View v) {
-        int position = (Integer) v.getTag();
         Intent i;
         switch (v.getId()) {
-            case R.id.ivPlaceImage:
+            case R.id.ivPlaceMenuSmallImage:
                 i = new Intent(mActivity, FullscreenPlaceImagesActivity.class);
-                Log.i(LOG_TAG, "starting full screen activity " + place_id + " " + imagesCount + " " + position);
                 i.putExtra("place_id", place_id);
                 i.putExtra("place_name", place_name);
-                i.putExtra("images_path", imagesPath);
                 i.putExtra("images_count", imagesCount);
-                i.putExtra("position", position);
-                i.putExtra("image_type", 0);
+                i.putExtra("images_path", imagesPath);
+                i.putExtra("position", (int) v.getTag());
+                i.putExtra("image_type", 1);
                 mActivity.startActivity(i);
+                break;
         }
     }
 
@@ -84,7 +86,9 @@ public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceIm
 
         public PlaceImageRecyclerViewHolder(View itemView) {
             super(itemView);
-            placeImage = (ImageView) itemView.findViewById(R.id.ivPlaceImage);
+            placeImage = (ImageView) itemView.findViewById(R.id.ivPlaceMenuSmallImage);
         }
     }
+
+
 }

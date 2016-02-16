@@ -48,20 +48,19 @@ public class PlaceSmallImagesRecyclerViewAdapter extends RecyclerView.Adapter<Pl
 
     @Override
     public PlaceImageRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.place_photos_row_card, parent,false);
+        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.place_photos_row_card, parent, false);
         return new PlaceImageRecyclerViewHolder(layoutView);
     }
 
     @Override
     public void onBindViewHolder(PlaceImageRecyclerViewHolder holder, int position) {
-        Log.i(LOG_TAG, "onBindViewHolder");
         holder.placeImage.setImageBitmap(imageBitmaps.get(position));
+        holder.placeImage.setTag(position);
         holder.placeImage.setOnClickListener(this);
     }
 
     @Override
     public int getItemCount() {
-        Log.i(LOG_TAG,"getItemCount : " + imageBitmaps.size());
         return imageBitmaps.size();
     }
 
@@ -76,6 +75,7 @@ public class PlaceSmallImagesRecyclerViewAdapter extends RecyclerView.Adapter<Pl
                 i.putExtra("images_count", imagesCount);
                 i.putExtra("images_path", imagesPath);
                 mActivity.startActivity(i);
+                break;
         }
     }
 
@@ -85,8 +85,9 @@ public class PlaceSmallImagesRecyclerViewAdapter extends RecyclerView.Adapter<Pl
 
         public PlaceImageRecyclerViewHolder(View itemView) {
             super(itemView);
+            Log.i(LOG_TAG, "cv id place image: " + String.valueOf(itemView.getId()));
             placeImage = (ImageView) itemView.findViewById(R.id.ivPlaceSmallImage);
-            Log.i(LOG_TAG, "PlaceImagerecyclerViewHolder");
+
         }
     }
 

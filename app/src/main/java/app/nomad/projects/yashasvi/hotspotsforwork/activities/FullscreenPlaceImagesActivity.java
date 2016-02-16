@@ -29,11 +29,13 @@ import java.util.List;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.MyApplication;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
-import app.nomad.projects.yashasvi.hotspotsforwork.adapters.FullScreenPlaceImageAdapter;
+import app.nomad.projects.yashasvi.hotspotsforwork.adapters.FullScreenImageAdapter;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageSize;
 import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.Constants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
 
 
 public class FullscreenPlaceImagesActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
@@ -49,18 +51,21 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
 
     Toolbar toolbar;
 
+    ImageType imageType;
+
     private ShareActionProvider mShareActionProvider;
 
     Bitmap currentBitmap;
 
-    FullScreenPlaceImageAdapter mAdapter;
-    List<Bitmap> placeImageBitmaps;
+    FullScreenImageAdapter mAdapter;
+    List<Bitmap> imageBitmaps;
 
     ViewPager mPager;
 
     String imageUrl;
     String placeId;
     String placeName;
+    String imagesPath;
     int position;
     int imagesCount;
 
@@ -83,19 +88,25 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
 
         mPager = (ViewPager) findViewById(R.id.pagerPlaceImages);
 
-        placeImageBitmaps = new ArrayList<>();
+        imageBitmaps = new ArrayList<>();
 
         imagesCount = getIntent().getIntExtra("images_count", 0);
         placeId = getIntent().getStringExtra("place_id");
         placeName = getIntent().getStringExtra("place_name");
         getSupportActionBar().setTitle(placeName);
         position = getIntent().getIntExtra("position", 0);
+        imagesPath = getIntent().getStringExtra("images_path");
+        int type = getIntent().getIntExtra("image_type", -1);
+        if (type == 1)
+            imageType = ImageType.MENU;
+        else if (type == 0)
+            imageType = ImageType.PLACE;
 
-        Log.i(LOG_TAG, "images_count " + imagesCount + ", placeId " + placeId + "placeName " + placeName + ", position " + position);
+        Log.i(LOG_TAG, "images_count " + imagesCount + ", placeId " + placeId + "placeName " + placeName + ", position " + position + "type " + imageType);
 
         populateBitmaps();
-        currentBitmap = placeImageBitmaps.get(position);
-        mAdapter = new FullScreenPlaceImageAdapter(this, placeImageBitmaps);
+        currentBitmap = imageBitmaps.get(position);
+        mAdapter = new FullScreenImageAdapter(this, imageBitmaps);
         mPager.setAdapter(mAdapter);
         mPager.setCurrentItem(position);
         mPager.addOnPageChangeListener(this);
@@ -105,16 +116,16 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         Bitmap bt;
         String key;
         for (int i = 0; i < imagesCount; i++) {
-            key = ServerHelperFunctions.getImageCacheKey(placeId, i, ImageType.FULL);
+            key = UtilFunctions.getImageCacheKey(placeId, imageType, i, ImageSize.FULL);
             bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
             if (bt != null) {
-                placeImageBitmaps.add(bt);
+                imageBitmaps.add(bt);
                 Log.i(LOG_TAG, "adding full size image from cache " + i);
             } else {
-                key = ServerHelperFunctions.getImageCacheKey(placeId, i, ImageType.THUMBNAIL);
+                key = UtilFunctions.getImageCacheKey(placeId, imageType, i, ImageSize.THUMBNAIL);
                 bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
                 if (bt != null) {
-                    placeImageBitmaps.add(bt);
+                    imageBitmaps.add(bt);
                     Log.i(LOG_TAG, "adding image thumbnail from cache " + i);
                 }
 
@@ -195,7 +206,7 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         Log.i(LOG_TAG, "page selected " + pos);
         position = pos;
         Bitmap bt;
-        String key = ServerHelperFunctions.getImageCacheKey(placeId, position, ImageType.FULL);
+        String key = UtilFunctions.getImageCacheKey(placeId, imageType, position, ImageSize.FULL);
         bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
         if (bt != null) {
             currentBitmap = bt;
@@ -206,8 +217,11 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
             return;
         }
         Log.i(LOG_TAG, "cache miss /m\\");
-        imageUrl = ServerConstants.SERVER_URL + ServerConstants.IMAGES_PATH +
-                placeName + "/" + placeName + String.valueOf(pos) + ".png";
+        if (imageType == ImageType.MENU) {
+            imageUrl = imagesPath + ServerConstants.MENU_PATH + placeName + String.valueOf(pos) + ".png";
+        } else if (imageType == ImageType.PLACE) {
+            imageUrl = imagesPath + ServerConstants.PLACE_PATH + placeName + String.valueOf(pos) + ".png";
+        }
         imageUrl = imageUrl.replace(" ", "%20");
         new downloadImageAsyncTask(imageUrl).execute();
     }
@@ -237,13 +251,13 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         protected void onProgressUpdate(Bitmap... bitmaps) {
             super.onProgressUpdate(bitmaps[0]);
             updateImageToFullSize(bitmaps[0]);
-            ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(placeId, position, ImageType.FULL), bitmaps[0]);
+            ((MyApplication) getApplication()).putBitmapInCache(UtilFunctions.getImageCacheKey(placeId, imageType, position, ImageSize.FULL), bitmaps[0]);
         }
     }
 
     public void updateImageToFullSize(Bitmap bitmap) {
         Log.i(LOG_TAG, "replacing bitmap");
-        placeImageBitmaps.set(position, bitmap);
+        imageBitmaps.set(position, bitmap);
         mAdapter.notifyDataSetChanged();
         currentBitmap = bitmap;
         //checkAndRequestPermissionsForSharingImage();

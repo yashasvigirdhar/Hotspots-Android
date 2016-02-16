@@ -17,12 +17,12 @@ import app.nomad.projects.yashasvi.hotspotsforwork.R;
 /**
  * Created by yashasvi on 1/30/16.
  */
-public class FullScreenPlaceImageAdapter extends PagerAdapter {
+public class FullScreenImageAdapter extends PagerAdapter {
 
     private Activity mActivity;
     private List<Bitmap> imageBitmaps;
 
-    public FullScreenPlaceImageAdapter(Activity activity, List<Bitmap> bitmaps) {
+    public FullScreenImageAdapter(Activity activity, List<Bitmap> bitmaps) {
         this.mActivity = activity;
         this.imageBitmaps = bitmaps;
     }

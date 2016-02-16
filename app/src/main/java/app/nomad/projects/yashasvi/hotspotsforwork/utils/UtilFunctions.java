@@ -7,6 +7,9 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 
 import app.nomad.projects.yashasvi.hotspotsforwork.enums.AppStart;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageSize;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
+import app.nomad.projects.yashasvi.hotspotsforwork.models.Timings;
 
 /**
  * Created by yashasvi on 2/4/16.
@@ -53,4 +56,41 @@ public class UtilFunctions {
         }
     }
 
+    public static String getImageCacheKey(String place_id, ImageType type, int number, ImageSize size) {
+        String key = "";
+        key += place_id;
+        key += "&";
+        key += type;
+        key += "&";
+        key += String.valueOf(number);
+        key += "&";
+        key += String.valueOf(size);
+        return key;
+    }
+
+    public static String getTimingsDialogString(Timings timings) {
+        String str = "";
+        str += "Monday : ";
+        str += timings.getMonday();
+        str += "\n\n";
+        str += "Tuesday : ";
+        str += timings.getTuesday();
+        str += "\n\n";
+        str += "Wednesday : ";
+        str += timings.getWednesday();
+        str += "\n\n";
+        str += "Thursday : ";
+        str += timings.getThursday();
+        str += "\n\n";
+        str += "Friday : ";
+        str += timings.getFriday();
+        str += "\n\n";
+        str += "Saturday : ";
+        str += timings.getSaturday();
+        str += "\n\n";
+        str += "Sunday : ";
+        str += timings.getSunday();
+        str += "\n";
+        return str;
+    }
 }

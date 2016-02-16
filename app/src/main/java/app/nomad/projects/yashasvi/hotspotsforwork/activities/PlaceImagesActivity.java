@@ -16,15 +16,15 @@ import java.util.List;
 import app.nomad.projects.yashasvi.hotspotsforwork.MyApplication;
 import app.nomad.projects.yashasvi.hotspotsforwork.R;
 import app.nomad.projects.yashasvi.hotspotsforwork.adapters.PlaceImagesRecyclerViewAdapter;
+import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageSize;
 import app.nomad.projects.yashasvi.hotspotsforwork.enums.ImageType;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerConstants;
 import app.nomad.projects.yashasvi.hotspotsforwork.utils.ServerHelperFunctions;
+import app.nomad.projects.yashasvi.hotspotsforwork.utils.UtilFunctions;
 
 public class PlaceImagesActivity extends AppCompatActivity {
 
     private static final String TAG = "PlaceImageActivity";
-
-    Toolbar toolbar;
 
     String placeId;
     String placeName;
@@ -63,7 +63,7 @@ public class PlaceImagesActivity extends AppCompatActivity {
         placeImagesRecyclerView.setLayoutManager(placeLayoutGridLayoutManager);
 
         placeImageBitmaps = new ArrayList<>();
-        placeImagesRecyclerViewAdapter = new PlaceImagesRecyclerViewAdapter(this, placeImageBitmaps, placeId, placeName, imagesCount);
+        placeImagesRecyclerViewAdapter = new PlaceImagesRecyclerViewAdapter(this, placeImageBitmaps, placeId, placeName, imagesPath, imagesCount);
         placeImagesRecyclerView.setAdapter(placeImagesRecyclerViewAdapter);
 
     }
@@ -78,15 +78,15 @@ public class PlaceImagesActivity extends AppCompatActivity {
 
             String path;
             for (int i = 0; i < imagesCount; i++) {
-                path = imagesPath + ServerConstants.THUMBNAILS_PATH + "/" + placeName + i + ".png";
+                path = imagesPath + ServerConstants.PLACE_PATH + ServerConstants.THUMBNAILS_PATH + placeName + i + ".png";
                 path = path.replace(" ", "%20");
                 Log.i(TAG, path);
-                Bitmap bt = ((MyApplication) getApplication()).getBitmapFromCache(ServerHelperFunctions.getImageCacheKey(placeId, i, ImageType.THUMBNAIL));
+                Bitmap bt = ((MyApplication) getApplication()).getBitmapFromCache(UtilFunctions.getImageCacheKey(placeId, ImageType.PLACE, i, ImageSize.THUMBNAIL));
                 if (bt == null) {
                     Log.i(TAG, "bitmap not present in cache " + i);
                     bt = ServerHelperFunctions.downloadBitmapFromUrl(path);
                 }
-                publishProgress(bt, i);
+                publishProgress(bt, ImageType.PLACE, i);
             }
             return null;
         }
@@ -94,14 +94,16 @@ public class PlaceImagesActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(Object... params) {
             Bitmap bitmap = (Bitmap) params[0];
-            int number = (Integer) params[1];
-
+            ImageType imageType = (ImageType) params[1];
+            int number = (Integer) params[2];
             super.onProgressUpdate(bitmap);
+            if (imageType == ImageType.PLACE) {
+                placeImageBitmaps.add(bitmap);
+                placeImagesRecyclerViewAdapter.notifyDataSetChanged();
+            } else if (imageType == ImageType.MENU) {
 
-            placeImageBitmaps.add(bitmap);
-            placeImagesRecyclerViewAdapter.notifyDataSetChanged();
-            placeImagesRecyclerViewAdapter.updateImagesCount(imagesCount);
-            ((MyApplication) getApplication()).putBitmapInCache(ServerHelperFunctions.getImageCacheKey(placeId, number, ImageType.THUMBNAIL), bitmap);
+            }
+            ((MyApplication) getApplication()).putBitmapInCache(UtilFunctions.getImageCacheKey(placeId, imageType, number, ImageSize.THUMBNAIL), bitmap);
         }
 
     }

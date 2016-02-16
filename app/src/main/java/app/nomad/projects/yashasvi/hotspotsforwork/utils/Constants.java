@@ -24,6 +24,8 @@ public class Constants {
 
     public static Map<Integer, String> chargingPointsLevel = new HashMap<>();
 
+    public static Map<Integer, String> days = new HashMap<>();
+
     /**
      * The app version code (not the version name!) that was used on the last
      * start of the app.
