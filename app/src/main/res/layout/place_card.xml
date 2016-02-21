@@ -12,6 +12,7 @@
         android:layout_height="130dp"
         android:layout_gravity="center"
         android:layout_margin="5dp"
+        card_view:cardBackgroundColor="@color/cardsBackground"
         card_view:cardCornerRadius="2dp"
         card_view:contentPadding="10dp">
 
@@ -36,36 +37,40 @@
                     <TextView
                         android:id="@+id/tvPlaceName"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.11"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.4"
                         android:text="Tea Everyday"
-                        android:textColor="@android:color/holo_blue_dark"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvPlaceArea"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.11"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.3"
+                        android:textSize="16sp"
                         android:text="Koramangala 7th Block, Bangalore"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvPlaceCost"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.11"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.3"
+                        android:textSize="16sp"
                         android:text="Cost : "
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:background="@android:color/holo_blue_dark"
-                    android:orientation="vertical"
-                    android:padding="5dp">
+
+                <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:padding="5dp"
+                    card_view:cardBackgroundColor="@color/colorPrimary"
+                    card_view:cardCornerRadius="2dp">
 
                     <TextView
                         android:id="@+id/tvPlaceRating"
@@ -76,13 +81,8 @@
                         android:textColor="#FFF"
                         android:textSize="16sp"
                         android:textStyle="bold" />
-                </LinearLayout>
+                </android.support.v7.widget.CardView>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -94,52 +94,52 @@
 
                 <LinearLayout
                     android:id="@+id/llPlaceCardCall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.2">
-
-                    <android.support.v7.widget.AppCompatImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/phone36" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.3">
-
-                    <android.support.v7.widget.AppCompatImageView
-                        android:layout_width="33dp"
-                        android:layout_height="match_parent"
-                        android:src="@mipmap/ic_wifi" />
-
-                    <TextView
-                        android:id="@+id/tvPlaceWifiRating"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="4.5"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/llPlaceCardNavigate"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0.3">
 
                     <android.support.v7.widget.AppCompatImageView
                         android:layout_width="25dp"
-                        android:layout_height="match_parent"
-                        android:src="@mipmap/ic_navigation" />
+                        android:layout_height="18dp"
+                        android:src="@drawable/phone24" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3">
+
+                    <android.support.v7.widget.AppCompatImageView
+                        android:layout_width="25dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/wifi24" />
+
+                    <TextView
+                        android:id="@+id/tvPlaceWifiRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="4.5"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llPlaceCardNavigate"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3">
+
+                    <android.support.v7.widget.AppCompatImageView
+                        android:layout_width="25dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/navigation24" />
 
                     <TextView
                         android:id="@+id/tvPlaceDistance"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="10.3km"
-                        android:textSize="15sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.nomad.projects.yashasvi.hotspotsforwork"
-    android:versionCode="1"
-    android:versionName="1">
+    package="app.nomad.projects.yashasvi.hotspots">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -13,14 +11,14 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".MyApplication"
+        android:name="app.nomad.projects.yashasvi.hotspots.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_wifi"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/MyMaterialTheme">
         <activity
-            android:name=".activities.CitySelectionActivity"
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.CitySelectionActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,13 +26,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".activities.PlacesListActivity"
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".activities.CitySelectionActivity">
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.CitySelectionActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.CitySelectionActivity" />
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.CitySelectionActivity" />
 
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -47,59 +46,67 @@
                 android:name="android.app.default_searchable"
                 android:value=".activities.PlacesListActivity" />
         </activity>
+
         <activity
-            android:name=".activities.PlaceViewActivity"
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".activities.PlacesListActivity">
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.PlacesListActivity" />
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
         </activity>
+
         <activity
-            android:name=".activities.AppFeedbackActivity"
-            android:parentActivityName=".activities.PlacesListActivity">
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.AppFeedbackActivity"
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.PlacesListActivity" />
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
         </activity>
-        <activity android:name=".activities.ZomatoWebviewActivity" />
+
+        <activity android:name="app.nomad.projects.yashasvi.hotspots.activities.ZomatoWebviewActivity" />
+
         <activity
-            android:name=".activities.PlaceImagesActivity"
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlaceImagesActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".activities.PlaceViewActivity">
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.PlaceViewActivity" />
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity" />
         </activity>
 
-        <provider
-            android:name=".contentProviders.PlaceSearchSuggestionProvider"
-            android:authorities="app.nomad.projects.yashasvi.hotspotsforwork.contentProviders.PlaceSearchSuggestionProvider" />
-
-        <activity android:name=".activities.PlaceFeedbackActivity" />
         <activity
-            android:name=".activities.SuggestNewPlaceActivity"
-            android:parentActivityName=".activities.PlacesListActivity">
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlaceFeedbackActivity"
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.PlacesListActivity" />
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity" />
         </activity>
+
         <activity
-            android:name=".activities.FullscreenPlaceImagesActivity"
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.SuggestNewPlaceActivity"
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
+        </activity>
+
+        <activity
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.FullscreenPlaceImagesActivity"
             android:label="@string/title_activity_fullscreen_place_images"
-            android:parentActivityName=".activities.PlaceImagesActivity">
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlaceImagesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.PlaceImagesActivity" />
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlaceImagesActivity" />
         </activity>
         <activity
-            android:name=".activities.AboutMeActivity"
-            android:parentActivityName=".activities.PlacesListActivity">
+            android:name="app.nomad.projects.yashasvi.hotspots.activities.AboutMeActivity"
+            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspotsforwork.activities.PlacesListActivity" />
+                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
         </activity>
     </application>
 

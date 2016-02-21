@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HotspotsForWork</string>
+    <string name="app_name">Hotspots</string>
     <string name="title_activity_place">PlaceActivity</string>
     <string name="action_settings">Settings</string>
     <string name="action_search">Search</string>

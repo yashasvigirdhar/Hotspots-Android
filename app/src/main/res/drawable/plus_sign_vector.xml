@@ -6,14 +6,14 @@
 
     <path
         android:name="mouth"
-        android:pathData="M 12.999,33 L 13,53"
+        android:pathData="M 12.999,45 L 13,65"
         android:strokeColor="?attr/colorPrimary"
         android:strokeLineCap="round"
         android:strokeWidth="3" />
 
     <path
         android:name="mouth"
-        android:pathData="M 3,43 L 23,42.999"
+        android:pathData="M 3,55 L 23,54.999"
         android:strokeColor="?attr/colorPrimary"
         android:strokeLineCap="round"
         android:strokeWidth="3" />

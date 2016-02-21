@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="5dp"
-    android:paddingLeft="0dp"
-    android:paddingRight="0dp"
-    android:paddingTop="0dp"
-    tools:context="app.nomad.projects.yashasvi.hotspotsforwork.activities.SuggestNewPlaceActivity">
+    android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/toolbarAboutMe"
-        layout="@layout/toolbar" />
-
-    <TextView
+    <LinearLayout
+        android:id="@+id/container_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/title_about" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/toolbarAboutMe"
+            layout="@layout/toolbar" />
+
+        <ImageView
+            android:id="@+id/ivLogoAbout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.3"
+            android:src="@mipmap/ic_wifi"/>
+
+        <TextView
+            android:id="@+id/tvTextAbout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7" />
+    </LinearLayout>
+
 </LinearLayout>

@@ -1,4 +1,4 @@
-package app.nomad.projects.yashasvi.hotspotsforwork;
+package app.nomad.projects.yashasvi.hotspots;
 
 import org.junit.Test;
 

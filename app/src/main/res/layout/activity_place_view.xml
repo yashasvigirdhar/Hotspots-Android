@@ -26,6 +26,7 @@
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
                 android:scaleType="fitXY"
+                android:alpha="0.6"
                 app:layout_collapseParallaxMultiplier="0.7" />
 
             <android.support.v7.widget.Toolbar
@@ -34,21 +35,10 @@
                 android:layout_height="?attr/actionBarSize"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:layout_collapseMode="pin"
+                android:alpha="1.0"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|enterAlways">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="what the fuck !!"
-                android:textColor="@android:color/primary_text_dark" />
-        </LinearLayout>
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
@@ -65,7 +55,11 @@
                 android:id="@+id/cv_placeAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="3dp"
+                android:layout_marginBottom="3dp"
+                android:layout_marginLeft="3dp"
+                android:layout_marginRight="3dp"
+                android:layout_marginTop="6dp"
+                card_view:cardBackgroundColor="@color/cardsBackground"
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
 
@@ -79,8 +73,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="0.2"
+                        android:layout_marginBottom="3dp"
                         android:orientation="vertical"
                         android:padding="5dp">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -91,17 +87,22 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-black"
-                                android:padding="5dp"
+                                android:paddingLeft="5dp"
+                                android:paddingTop="5dp"
+                                android:paddingBottom="1dp"
                                 android:text="TIMINGS"
                                 android:textAllCaps="true"
-                                android:textSize="17sp" />
+                                android:textSize="15sp" />
 
                             <ImageButton
                                 android:id="@+id/ibTimingExpand"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="22dp"
                                 android:background="@android:color/transparent"
-                                android:padding="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
+                                android:paddingTop="7dp"
+                                android:paddingBottom="1dp"
                                 android:src="@drawable/plus_sign_vector" />
 
                         </LinearLayout>
@@ -111,9 +112,9 @@
                             android:id="@+id/tvPlaceTimingsValue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:padding="5dp"
-                            android:text="always open" />
+                            android:paddingLeft="5dp"
+                            android:paddingTop="1dp"
+                            android:text="-" />
                     </LinearLayout>
 
 
@@ -121,6 +122,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="0.3"
+                        android:layout_marginBottom="3dp"
                         android:orientation="horizontal"
                         android:padding="5dp">
 
@@ -135,17 +137,18 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-black"
-                                android:padding="5dp"
+                                android:paddingLeft="5dp"
+                                android:paddingBottom="1dp"
                                 android:text="PHONE NO"
                                 android:textAllCaps="true"
-                                android:textSize="17sp" />
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:id="@+id/tvPlacePhoneValue"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="sans-serif-medium"
-                                android:padding="5dp"
+                                android:paddingLeft="5dp"
+                                android:paddingTop="1dp"
                                 android:text="8143914414" />
                         </LinearLayout>
 
@@ -156,13 +159,14 @@
 
                             <ImageButton
                                 android:id="@+id/ibCallPlace"
-                                android:layout_width="35dp"
-                                android:layout_height="35dp"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:tint="@color/colorPrimary"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginLeft="30dp"
+                                android:layout_marginStart="30dp"
                                 android:background="@android:color/transparent"
                                 android:padding="5dp"
-                                android:src="@drawable/phone36" />
+                                android:src="@drawable/phone1" />
 
                         </LinearLayout>
 
@@ -184,16 +188,19 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:padding="5dp"
+                                android:paddingLeft="5dp"
+                                android:paddingBottom="1dp"
                                 android:text="ADDRESS"
+                                android:textStyle="bold"
                                 android:textAllCaps="true"
-                                android:textStyle="bold" />
+                                android:textSize="15dp" />
 
                             <TextView
                                 android:id="@+id/tvPlaceAddressValue"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:padding="5dp"
+                                android:paddingLeft="5dp"
+                                android:paddingTop="1dp"
                                 android:text="@string/dummy_address" />
                         </LinearLayout>
 
@@ -204,13 +211,14 @@
 
                             <ImageButton
                                 android:id="@+id/ibNavigateToPlace"
-                                android:layout_width="35dp"
-                                android:layout_height="35dp"
+                                android:tint="@color/colorPrimary"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="30dp"
                                 android:background="@android:color/transparent"
                                 android:padding="5dp"
-                                android:src="@mipmap/ic_navigation" />
+                                android:src="@drawable/navigation24" />
 
                         </LinearLayout>
 
@@ -222,6 +230,7 @@
                 android:id="@+id/cv_placeCost"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                card_view:cardBackgroundColor="@color/cardsBackground"
                 android:layout_margin="3dp"
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
@@ -235,7 +244,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="5dp"
+                        android:paddingLeft="5dp"
+                        android:paddingBottom="1dp"
                         android:text="Cost per person"
                         android:textAllCaps="true"
                         android:textStyle="bold" />
@@ -243,7 +253,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="5dp"
+                        android:paddingLeft="5dp"
+                        android:paddingTop="1dp"
                         android:text="Rs. 250" />
 
                 </LinearLayout>
@@ -254,6 +265,7 @@
                 android:id="@+id/cv_placeServices"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                card_view:cardBackgroundColor="@color/cardsBackground"
                 android:layout_margin="3dp"
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
@@ -286,7 +298,8 @@
                             android:id="@+id/tvAmbianceValue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="5dp"
+                            android:paddingLeft="5dp"
+                            android:paddingTop="1dp"
                             android:text="Peaceful, Very less crowd"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -307,7 +320,8 @@
                                 android:id="@+id/tvWifiKey"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
-                                android:padding="5dp"
+                                android:paddingLeft="5dp"
+                                android:paddingBottom="1dp"
                                 android:text="@string/wifi"
                                 android:textAllCaps="true"
                                 android:textStyle="bold" />
@@ -316,7 +330,8 @@
                                 android:id="@+id/tvWifiPaidValue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
-                                android:padding="5dp"
+                                android:paddingLeft="5dp"
+                                android:paddingTop="1dp"
                                 android:text="Good for surfing" />
                         </LinearLayout>
 
@@ -340,7 +355,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:padding="5dip"
+                            android:paddingLeft="5dp"
+                            android:paddingBottom="1dp"
                             android:text="Charging points"
                             android:textAllCaps="true"
                             android:textStyle="bold" />
@@ -349,7 +365,8 @@
                             android:id="@+id/tvChargingPointsValue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="5dp"
+                            android:paddingLeft="5dp"
+                            android:paddingTop="1dp"
                             android:text="not easy to find" />
                     </LinearLayout>
 
@@ -362,6 +379,7 @@
                 android:id="@+id/cv_placePhotos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                card_view:cardBackgroundColor="@color/cardsBackground"
                 android:layout_margin="3dp"
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
@@ -382,6 +400,7 @@
                         android:fontFamily="sans-serif-black"
                         android:padding="5dp"
                         android:text="PHOTOS"
+                        android:textColor="@color/colorAccent"
                         android:textAllCaps="true"
                         android:textSize="17sp" />
 
@@ -404,15 +423,15 @@
                             xmlns:card_view="http://schemas.android.com/apk/res-auto"
                             android:layout_width="61dp"
                             android:layout_height="61dp"
-                            card_view:cardCornerRadius="1dp"
-                            card_view:cardUseCompatPadding="true">
+                            card_view:cardCornerRadius="1dp">
 
                             <TextView
+                                android:id="@+id/tvMoreImages"
                                 style="@android:style/Widget.Button"
                                 android:layout_width="61dp"
                                 android:layout_height="61dp"
                                 android:text="+8"
-                                android:textAppearance="?android:attr/textAppearanceButton"></TextView>
+                                android:textAppearance="?android:attr/textAppearanceButton" />
                         </android.support.v7.widget.CardView>
 
                     </LinearLayout>
@@ -424,6 +443,7 @@
                 android:id="@+id/cv_placeFood"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                card_view:cardBackgroundColor="@color/cardsBackground"
                 android:layout_margin="3dp"
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
@@ -436,16 +456,42 @@
                     android:paddingBottom="0dp"
                     android:paddingTop="0dp">
 
-                    <TextView
-                        android:id="@+id/tvPlaceFoodkey"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="0.2"
-                        android:fontFamily="sans-serif-black"
-                        android:padding="5dp"
-                        android:text="FOOD"
-                        android:textAllCaps="true"
-                        android:textSize="17sp" />
+                        android:paddingBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvPlaceFoodkey"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.6"
+                            android:textColor="@color/colorAccent"
+                            android:fontFamily="sans-serif-black"
+                            android:padding="5dp"
+                            android:text="FOOD"
+                            android:textAllCaps="true"
+                            android:textSize="17sp" />
+
+                        <LinearLayout
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:orientation="vertical"
+                            android:padding="5dp">
+
+                            <TextView
+                                android:id="@+id/tvPlaceFoodRating"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="4.2"
+                                android:textColor="@color/colorAccent"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/recyclerViewMenuPlaceViewPage"
@@ -462,6 +508,7 @@
                 android:id="@+id/cv_detailedInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                card_view:cardBackgroundColor="@color/cardsBackground"
                 android:layout_margin="3dp"
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
@@ -486,7 +533,6 @@
                         android:id="@+id/tvDescriptionValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
                         android:padding="5dp"
                         android:text="A very small cafe, having a capacity of up to 15 people. This place is located in Koramangala 7th block, just opposite to Forum mall. It has been designed very carefully, specially the walls and elements such as sticky notes and small mirrors  add to it's beauty. The place opens early in the morning around 9 am and offers a good variety of breakfast options. Other than that, food menu mainly contains pasta, sandwiches, pancakes and noodles  along this some shakes and juices.
 \n\nThe place is usually not crowded which leads to :

@@ -6,7 +6,7 @@
     <path
         android:pathData="@string/path_circle"
         android:strokeColor="@android:color/black"
-        android:fillColor="@android:color/holo_blue_light"
+        android:fillColor="@color/colorPrimary"
         android:strokeWidth="@integer/stroke_width" />
     <path
         android:fillColor="@android:color/black"
