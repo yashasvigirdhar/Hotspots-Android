@@ -1,6 +1,8 @@
 package app.nomad.projects.yashasvi.hotspots.activities;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -10,11 +12,14 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -53,21 +58,27 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     private String city = "";
 
     boolean doubleBackToExitPressedOnce = false;
+
+
     private Toast toast = null;
 
+    CoordinatorLayout coordinatorLayout;
 
     private RecyclerView mRecyclerView;
     private PlacesRecyclerViewAdapter mAdapter;
 
-    private LocationManager locationManager = null;
     private LocationHelper locationHelper = null;
 
     private ArrayList<Place> places;
     private List<Float> distances;
 
+    private ProgressDialog pd;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(LOG_TAG, "onCreate");
+        Log.i(LOG_TAG, getApplicationContext().getPackageName());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_places);
         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.placesActivityBackground));
@@ -79,6 +90,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     }
 
     private void getPlaces() {
+        pd = ProgressDialog.show(this, "Loading..", "Please wait", true, true);
         new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity(city)).execute();
     }
 
@@ -102,13 +114,14 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     private void initialize() {
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbarPlacesList);
 
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorPlacesList);
+
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        //LinearLayout toolbarTitle = (LinearLayout) mToolbar.findViewById(R.id.ll_toolbar_title);
         TextView title = (TextView) mToolbar.findViewById(R.id.tv_toolbar_title);
         title.setText(city);
-        title.setOnClickListener(this);
+        mToolbar.findViewById(R.id.ll_toolbarPlacesList).setOnClickListener(this);
 
         FragmentDrawer drawerFragment = (FragmentDrawer)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
@@ -127,9 +140,12 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         mAdapter.setOnPlaceClickedListener(this);
         mRecyclerView.setAdapter(mAdapter);
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        locationHelper = new LocationHelper(this, locationManager, this);
+        locationHelper = new LocationHelper(this, locationManager, this, coordinatorLayout);
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            locationHelper.registerLocationManager();
+        }
     }
 
     private void calculatePlacesDistance() {
@@ -164,7 +180,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        locationHelper.getLocationFromSystem();
     }
 
     @Override
@@ -188,7 +204,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.tv_toolbar_title:
+            case R.id.ll_toolbarPlacesList:
                 Intent i = new Intent(this, CitySelectionActivity.class);
                 i.putExtra("from", "places");
                 startActivity(i);
@@ -199,20 +215,20 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
-        }
+        //  if (doubleBackToExitPressedOnce) {
+        super.onBackPressed();
+        return;
+        //}
 
-        this.doubleBackToExitPressedOnce = true;
-        showToast("Press again to exit");
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
+//        this.doubleBackToExitPressedOnce = true;
+//        showToast("Press again to exit");
+//        new Handler().postDelayed(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                doubleBackToExitPressedOnce = false;
+//            }
+//        }, 2000);
     }
 
     private void showToast(String message) {
@@ -282,10 +298,15 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
         @Override
         protected void onPostExecute(String jsonString) {
-            if (jsonString.contains("Exception")) {
-                Toast.makeText(PlacesListActivity.this, "Unable to fetch places, Please try after some time", Toast.LENGTH_SHORT).show();
-            }
             super.onPostExecute(jsonString);
+            if(pd!=null && pd.isShowing())
+            {
+                pd.dismiss();
+            }
+            if (jsonString.contains("Exception")) {
+                Toast.makeText(PlacesListActivity.this, "Unable to fetch places. Please check your connectivity and try again.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Type collectionType = new TypeToken<List<Place>>() {
             }.getType();
             try {
@@ -293,7 +314,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                 for (int i = 0; i < receivedPlaces.size(); i++)
                     places.add(receivedPlaces.get(i));
                 mAdapter.notifyDataSetChanged();
-                locationHelper.initiateLocationProcess();
+                locationHelper.checkPermissionAndgetLocation();
                 for (int i = 0; i < places.size(); i++)
                     Log.i(LOG_TAG, places.get(i).toString());
             } catch (JsonSyntaxException e) {
@@ -307,17 +328,42 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         switch (requestCode) {
-            case Constants.REQUEST_CODE_ASK_PERMISSIONS:
+            case Constants.REQUEST_CODE_GPS_PERMISSIONS:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    locationHelper.initiateLocationProcess();
+                    locationHelper.getLocationFromSystem();
                     if (locationHelper.getLocation() != null)
                         calculatePlacesDistance();
                 } else {
-                    Toast.makeText(this, "You have to grant permissions in order to show distance", Toast.LENGTH_SHORT).show();
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(PlacesListActivity.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        Snackbar snackbar = Snackbar
+                                .make(coordinatorLayout, "To show the distances of places, gps permission is required", Snackbar.LENGTH_INDEFINITE)
+                                .setAction("ALLOW", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        ActivityCompat.requestPermissions(PlacesListActivity.this,
+                                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                                Constants.REQUEST_CODE_GPS_PERMISSIONS);
+                                    }
+                                })
+                                .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                        snackbar.show();
+                        break;
+                    }
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "To show the distances of places, gps permission is required", Snackbar.LENGTH_INDEFINITE)
+                            .setAction("SETTINGS", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
+                                    startActivityForResult(intent, Constants.REQUEST_CODE_INTENT_APP_SETTINGS);
+                                }
+                            })
+                            .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                    snackbar.show();
                 }
                 break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
@@ -368,6 +414,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
                 @Override
                 public boolean onMenuItemActionCollapse(MenuItem item) {
+                    mAdapter.flushFilter();
                     return true;
                 }
             });
@@ -378,10 +425,17 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.REQUEST_CODE_INTENT_GPS_SETTINGS) {
-            locationHelper.updateIsGpsEnabled();
-            locationHelper.initiateLocationProcess();
-
+        switch (requestCode) {
+            case Constants.REQUEST_CODE_INTENT_GPS_SETTINGS:
+                locationHelper.updateIsGpsEnabled();
+                locationHelper.getLocationFromSystem();
+                break;
+            case Constants.REQUEST_CODE_INTENT_APP_SETTINGS:
+                int hasGpsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+                if (hasGpsPermission == PackageManager.PERMISSION_GRANTED) {
+                    locationHelper.getLocationFromSystem();
+                }
+                break;
         }
     }
 }

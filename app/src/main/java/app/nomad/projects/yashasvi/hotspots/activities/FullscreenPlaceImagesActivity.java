@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
@@ -18,7 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.View;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,8 +42,6 @@ import app.nomad.projects.yashasvi.hotspots.utils.UtilFunctions;
 public class FullscreenPlaceImagesActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
 
     private final static String LOG_TAG = "FullScreenImageActivity";
-
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
 
     private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -78,6 +77,8 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         setContentView(R.layout.activity_fullscreen_place_images);
         initialize();
         this.onPageSelected(position);
+        checkAndRequestStorageWritePermissionForSharingImage();
+        //checkAndRequestStorageReadPermissionForSharingImage();
     }
 
     private void initialize() {
@@ -174,25 +175,44 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
-        checkAndRequestPermissionsForSharingImage();
         // Return true to display menu
         return true;
     }
 
-    private void checkAndRequestPermissionsForSharingImage() {
-        int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        Log.i(LOG_TAG, "external storage write permission : " + permission);
-        if (permission != PackageManager.PERMISSION_GRANTED) {
+    private void checkAndRequestStorageWritePermissionForSharingImage() {
+        int permission1 = ActivityCompat.checkSelfPermission(this, PERMISSIONS_STORAGE[0]);
+        int permission2 = ActivityCompat.checkSelfPermission(this, PERMISSIONS_STORAGE[1]);
+        if (permission1 != PackageManager.PERMISSION_GRANTED || permission2 != PackageManager.PERMISSION_GRANTED) {
+            Log.i(LOG_TAG, "external storage write permission not granted");
             // We don't have permission so prompt the user
             ActivityCompat.requestPermissions(
                     this,
                     PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
+                    Constants.REQUEST_CODE_EXTERNAL_STORAGE_PERMISSION
+            );
+        }
+    }
+
+    private void checkAndRequestStorageReadPermissionForSharingImage() {
+        int permission = ActivityCompat.checkSelfPermission(this, PERMISSIONS_STORAGE[1]);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            Log.i(LOG_TAG, "external storage write permission not granted");
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    Constants.REQUEST_CODE_EXTERNAL_STORAGE_PERMISSION
             );
         }
     }
 
     private void setShareImageReady() {
+
+        int permission1 = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permission2 = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permission1 != PackageManager.PERMISSION_GRANTED || permission2 != PackageManager.PERMISSION_GRANTED)
+            return;
+
         try {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             currentBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
@@ -235,7 +255,7 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         bt = ((MyApplication) getApplication()).getBitmapFromCache(key);
         if (bt != null) {
             currentBitmap = bt;
-            //checkAndRequestPermissionsForSharingImage();
+            //checkAndRequestStorageWritePermissionForSharingImage();
             setShareImageReady();
             invalidateOptionsMenu();
             Log.i(LOG_TAG, "cache hit \\m/\nalready contains full size image");
@@ -286,18 +306,43 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         imageBitmaps.set(position, bitmap);
         mAdapter.notifyDataSetChanged();
         currentBitmap = bitmap;
-        //checkAndRequestPermissionsForSharingImage();
+        //checkAndRequestStorageWritePermissionForSharingImage();
         setShareImageReady();
         invalidateOptionsMenu();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull final String[] permissions, @NonNull int[] grantResults) {
 
         switch (requestCode) {
-            case REQUEST_EXTERNAL_STORAGE:
+            case Constants.REQUEST_CODE_EXTERNAL_STORAGE_PERMISSION:
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "You have to grant access to external storage directory in order to share images with others", Toast.LENGTH_SHORT).show();
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                        Snackbar snackbar = Snackbar.make(findViewById(R.id.llFullScreenActivity), "Storage read and write permission is required for sharing the image", Snackbar.LENGTH_INDEFINITE)
+                                .setAction("ALLOW", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        ActivityCompat.requestPermissions(FullscreenPlaceImagesActivity.this,
+                                                PERMISSIONS_STORAGE, Constants.REQUEST_CODE_EXTERNAL_STORAGE_PERMISSION);
+                                    }
+
+                                })
+                                .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                        snackbar.show();
+                        break;
+                    }
+                    Snackbar snackbar = Snackbar
+                            .make(findViewById(R.id.llFullScreenActivity), "Storage read and write permission is required for sharing the image", Snackbar.LENGTH_INDEFINITE)
+                            .setAction("SETTINGS", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
+                                    startActivityForResult(intent, Constants.REQUEST_CODE_EXTERNAL_STORAGE_PERMISSION);
+                                }
+                            })
+                            .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                    snackbar.show();
                 }
                 break;
             default:
@@ -305,5 +350,12 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         }
     }
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Constants.REQUEST_CODE_EXTERNAL_STORAGE_PERMISSION:
+                int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+    }
 }

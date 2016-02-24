@@ -37,7 +37,7 @@ public class MyApplication extends Application {
         Constants.wifiSpeedLevel.put(1.0, "Slow surfing");
         Constants.wifiSpeedLevel.put(2.0, "Good for surfing");
         Constants.wifiSpeedLevel.put(3.0, "Surfing + images/videos");
-        Constants.wifiSpeedLevel.put(4.0, "Video calls  + HQ videos");
+        Constants.wifiSpeedLevel.put(4.0, "Video calls + HQ videos");
         Constants.wifiSpeedLevel.put(5.0, "Blazing Fast");
 
         Constants.chargingPointsLevel.put(1, "Very less");

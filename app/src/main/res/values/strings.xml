@@ -80,4 +80,6 @@
     <string name="dummy_address">411, NS Centre, 7th Block, C Cross, 1st Main, Behind Vodafone Showroom, Koramangala 7th Block</string>
     <string name="cost_per_person">"Cost per person : Rs. "</string>
     <string name="wifi">Wifi</string>
+
+    <string name="about_description">Hotspots aims to provide you an extremely easy way to discover places in a city where you can take your laptop, when you are tired of applying wifi filter on other places.</string>
 </resources>

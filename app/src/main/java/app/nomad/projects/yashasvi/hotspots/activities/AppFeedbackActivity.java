@@ -22,8 +22,8 @@ import com.google.gson.Gson;
 import java.net.HttpURLConnection;
 
 import app.nomad.projects.yashasvi.hotspots.R;
-import app.nomad.projects.yashasvi.hotspots.models.AppFeedback;
 import app.nomad.projects.yashasvi.hotspots.enums.FeedbackType;
+import app.nomad.projects.yashasvi.hotspots.models.AppFeedback;
 import app.nomad.projects.yashasvi.hotspots.utils.ServerHelperFunctions;
 
 public class AppFeedbackActivity extends AppCompatActivity implements View.OnClickListener {

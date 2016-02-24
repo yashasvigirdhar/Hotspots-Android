@@ -69,9 +69,12 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     private TextView tvWifiValue;
     private TextView tvWifiPaid;
     private TextView tvChargingPoints;
+    private TextView tvCostValue;
     private TextView tvPhone;
     private TextView tvMoreImages;
     private TextView tvFoodRating;
+
+    private TextView tvStaffValue;
 
     private RecyclerView recyclerViewPlaceSmallImages;
     private PlaceSmallImagesRecyclerViewAdapter placeSmallImagesAdapter;
@@ -109,6 +112,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
         day = Constants.days.get(Calendar.getInstance().get(Calendar.DAY_OF_WEEK));
 
+
         toolbar = (Toolbar) findViewById(R.id.technique_three_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -135,6 +139,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         tvAmbiance = (TextView) findViewById(R.id.tvAmbianceValue);
         tvDescription = (TextView) findViewById(R.id.tvDescriptionValue);
 
+        tvStaffValue = (TextView) findViewById(R.id.tvStaffValue);
+
+        tvCostValue = (TextView) findViewById(R.id.tvPlaceCostValue);
         tvFoodRating = (TextView) findViewById(R.id.tvPlaceFoodRating);
 
         tvWifiPaid = (TextView) findViewById(R.id.tvWifiPaidValue);
@@ -169,11 +176,13 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
         tvAddress.setText(place.getAddress());
         tvAmbiance.setText(String.valueOf(place.getAmbiance()));
+        tvStaffValue.setText(place.getService()+"/5");
         tvChargingPoints.setText(Constants.chargingPointsLevel.get(Integer.parseInt(place.getChargingPoints())));
 
         tvWifiValue.setText(Constants.wifiSpeedLevel.get(Double.parseDouble(place.getWifiSpeed())));
-        tvWifiPaid.setText("( " + place.getWifiPaid() + ")");
+        tvWifiPaid.setText("(" + place.getWifiPaid() + ")");
 
+        tvCostValue.setText("Rs. " + place.getCost());
         tvFoodRating.setText(place.getFood());
 
         tvDescription.setText(place.getDescription());

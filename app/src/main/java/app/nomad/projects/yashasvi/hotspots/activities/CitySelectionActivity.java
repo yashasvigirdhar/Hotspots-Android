@@ -1,5 +1,6 @@
 package app.nomad.projects.yashasvi.hotspots.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -39,6 +40,8 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
     private CitiesRecyclerViewAdapter mAdapter;
 
     private ArrayList<Place> places;
+
+    private ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +100,7 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
     }
 
     private void getCities() {
+        pd = ProgressDialog.show(this, "Loading..", "Please wait", true,true);
         new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity("city")).execute();
     }
 
@@ -132,7 +136,7 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
         super.onResume();
         Intent i = new Intent(this, PlacesListActivity.class);
         i.putExtra("city", city);
-        //i.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+       // i.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(i);
         finish();
     }
@@ -153,9 +157,14 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
         @Override
         protected void onPostExecute(String jsonString) {
             super.onPostExecute(jsonString);
+            if(pd!=null && pd.isShowing())
+            {
+                pd.dismiss();
+            }
             Log.i(LOG_TAG, "on post execute\n" + jsonString);
             if (jsonString.contains("Exception")) {
-                Toast.makeText(CitySelectionActivity.this, "Unable to fetch cities, Please try after some time", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CitySelectionActivity.this, "Unable to fetch cities. Please check your connectivity and try again.", Toast.LENGTH_SHORT).show();
+                return;
             }
             Type collectionType = new TypeToken<List<Place>>() {
             }.getType();
@@ -166,6 +175,10 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
                     places.add(tempPlaces.get(i));
                 }
                 mAdapter.notifyDataSetChanged();
+                if(pd!=null && pd.isShowing())
+                {
+                    pd.dismiss();
+                }
             } catch (JsonSyntaxException e) {
                 //not able to parse response, after requesting all places
             }

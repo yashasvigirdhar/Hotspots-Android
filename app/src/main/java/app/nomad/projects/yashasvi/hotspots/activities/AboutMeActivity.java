@@ -3,10 +3,12 @@ package app.nomad.projects.yashasvi.hotspots.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import app.nomad.projects.yashasvi.hotspots.R;
+import app.nomad.projects.yashasvi.hotspots.utils.Constants;
 
 public class AboutMeActivity extends AppCompatActivity {
 
@@ -17,7 +19,7 @@ public class AboutMeActivity extends AppCompatActivity {
     private Toolbar toolbar;
 
     private ImageView ivLogo;
-    private TextView tvAbout;
+    private TextView tvAboutName, tvAboutVersion, tvAboutDescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +34,15 @@ public class AboutMeActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.title_about);
         ivLogo = (ImageView) findViewById(R.id.ivLogoAbout);
-        tvAbout = (TextView) findViewById(R.id.tvTextAbout);
-        tvAbout.setText("HotSpots");
+
+
+        tvAboutVersion = (TextView) findViewById(R.id.tvTextAboutVersion);
+        tvAboutVersion.setGravity(Gravity.CENTER);
+        tvAboutVersion.setText(Constants.VERSION_NO);
+        tvAboutVersion.setTextColor(getResources().getColor(R.color.colorPrimary));
+
+        tvAboutDescription = (TextView) findViewById(R.id.tvTextAboutDescription);
+        tvAboutDescription.setText(Constants.ABOUT_DESCRIPTION);
     }
 
     @Override
