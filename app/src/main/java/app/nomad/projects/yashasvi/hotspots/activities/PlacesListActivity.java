@@ -7,6 +7,9 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -22,15 +25,18 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +46,9 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import app.nomad.projects.yashasvi.hotspots.R;
@@ -59,7 +68,6 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     boolean doubleBackToExitPressedOnce = false;
 
-
     private Toast toast = null;
 
     CoordinatorLayout coordinatorLayout;
@@ -74,11 +82,16 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     private ProgressDialog pd;
 
+    AlertDialog.Builder dialogBuilder;
+    AlertDialog sortDialog;
+
+    private Boolean areDistanceCalculated;
+    HashMap<Integer, Float> placeDistances;
+
+    RadioButton rbDistance, rbWifi, rbFood, rbRating;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i(LOG_TAG, "onCreate");
-        Log.i(LOG_TAG, getApplicationContext().getPackageName());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_places);
         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.placesActivityBackground));
@@ -119,6 +132,8 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        areDistanceCalculated = false;
+
         TextView title = (TextView) mToolbar.findViewById(R.id.tv_toolbar_title);
         title.setText(city);
         mToolbar.findViewById(R.id.ll_toolbarPlacesList).setOnClickListener(this);
@@ -130,6 +145,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
         places = new ArrayList<>();
         distances = new ArrayList<>();
+        placeDistances = new HashMap<>();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
@@ -143,20 +159,41 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         locationHelper = new LocationHelper(this, locationManager, this, coordinatorLayout);
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationHelper.registerLocationManager();
         }
+
+        dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.sort_dialog, null);
+        dialogBuilder.setView(dialogView);
+        rbDistance = (RadioButton) dialogView.findViewById(R.id.radioBDistance);
+        rbDistance.setOnClickListener(this);
+
+        rbWifi = (RadioButton) dialogView.findViewById(R.id.radioBWifi);
+        rbWifi.setOnClickListener(this);
+
+        rbRating = (RadioButton) dialogView.findViewById(R.id.radioBRating);
+        rbRating.setOnClickListener(this);
+        sortDialog = dialogBuilder.create();
     }
 
     private void calculatePlacesDistance() {
         Location placeLocation;
+        Float distance;
+        Place place;
+        distances.clear();
         for (int i = 0; i < places.size(); i++) {
+            place = places.get(i);
             placeLocation = new Location(LocationManager.GPS_PROVIDER);
-            placeLocation.setLatitude(Double.parseDouble(places.get(i).getLatitude()));
-            placeLocation.setLongitude(Double.parseDouble(places.get(i).getLongitude()));
-            distances.add(locationHelper.getLocation().distanceTo(placeLocation) / 1000);
+            placeLocation.setLatitude(Double.parseDouble(place.getLatitude()));
+            placeLocation.setLongitude(Double.parseDouble(place.getLongitude()));
+            distance = locationHelper.getLocation().distanceTo(placeLocation) / 1000;
+            distances.add(distance);
+            placeDistances.put(place.getId(), distance);
         }
         mAdapter.notifyDataSetChanged();
+        areDistanceCalculated = true;
 
     }
 
@@ -210,43 +247,71 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                 startActivity(i);
                 finish();
                 break;
+            case R.id.radioBDistance:
+                rbRating.setChecked(false);
+                rbWifi.setChecked(false);
+                if (areDistanceCalculated) {
+                    Collections.sort(places, new Comparator<Place>() {
+                        @Override
+                        public int compare(Place lhs, Place rhs) {
+                            return placeDistances.get(lhs.getId()).compareTo(placeDistances.get(rhs.getId()));
+                        }
+                    });
+                    calculatePlacesDistance();
+//                    Log.i(LOG_TAG, "after sorting by distance");
+//                    for (int idx = 0; idx < places.size(); idx++) {
+//                        Log.i(LOG_TAG, places.get(idx).toString());
+//                    }
+//                    mAdapter.notifyDataSetChanged();
+                    if (sortDialog.isShowing())
+                        sortDialog.cancel();
+                } else {
+                    Toast.makeText(PlacesListActivity.this, "Please wait while the distances are being calculated", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.radioBRating:
+                rbDistance.setChecked(false);
+                rbWifi.setChecked(false);
+                Collections.sort(places, new Comparator<Place>() {
+                    @Override
+                    public int compare(Place lhs, Place rhs) {
+                        return rhs.getRating().compareTo(lhs.getRating());
+                    }
+                });
+                calculatePlacesDistance();
+                //Log.i(LOG_TAG, "after sorting by rating");
+//                for (int idx = 0; idx < places.size(); idx++) {
+//                    Log.i(LOG_TAG, places.get(idx).toString());
+//                }
+                //mAdapter.notifyDataSetChanged();
+                if (sortDialog.isShowing())
+                    sortDialog.cancel();
+                break;
+            case R.id.radioBWifi:
+                rbRating.setChecked(false);
+                rbDistance.setChecked(false);
+                Collections.sort(places, new Comparator<Place>() {
+                    @Override
+                    public int compare(Place lhs, Place rhs) {
+                        return rhs.getWifiSpeed().compareTo(lhs.getWifiSpeed());
+                    }
+                });
+                calculatePlacesDistance();
+//                Log.i(LOG_TAG, "after sorting by wifi");
+//                for (int idx = 0; idx < places.size(); idx++) {
+//                    Log.i(LOG_TAG, places.get(idx).toString());
+//                }
+//                mAdapter.notifyDataSetChanged();
+                if (sortDialog.isShowing())
+                    sortDialog.cancel();
+                break;
         }
     }
 
     @Override
     public void onBackPressed() {
-        //  if (doubleBackToExitPressedOnce) {
         super.onBackPressed();
         return;
-        //}
-
-//        this.doubleBackToExitPressedOnce = true;
-//        showToast("Press again to exit");
-//        new Handler().postDelayed(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                doubleBackToExitPressedOnce = false;
-//            }
-//        }, 2000);
-    }
-
-    private void showToast(String message) {
-        if (this.toast == null) {
-            // Create toast if found null, it would he the case of first call only
-            this.toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-
-        } else if (this.toast.getView() == null) {
-            // Toast not showing, so create new one
-            this.toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-
-        } else {
-            // Updating toast message is showing
-            this.toast.setText(message);
-        }
-
-        // Showing toast finally
-        this.toast.show();
     }
 
     @Override
@@ -299,8 +364,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         @Override
         protected void onPostExecute(String jsonString) {
             super.onPostExecute(jsonString);
-            if(pd!=null && pd.isShowing())
-            {
+            if (pd != null && pd.isShowing()) {
                 pd.dismiss();
             }
             if (jsonString.contains("Exception")) {
@@ -419,7 +483,24 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                 }
             });
         }
+
+        MenuItem sortItem = menu.findItem(R.id.action_sort);
+        Drawable sortDrawable = sortItem.getIcon();
+        sortDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_sort:
+                sortDialog.show();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

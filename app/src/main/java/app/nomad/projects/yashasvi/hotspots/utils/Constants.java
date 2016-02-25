@@ -37,10 +37,10 @@ public class Constants {
     public static final String SELECTED_CITY = "1";
 
     public static final String PLACE_SHARE_TEXT = "Hey ! I came across this place called %s. It has wifi rating of %s. " +
-            "If you want other information about the place, download this app from play store : " + "play store link";
+            "If you want other information about the place, download this app from play store : " + "https://play.google.com/store/apps/details?id=app.nomad.projects.yashasvi.hotspotsforwork";
 
     public static final String IMAGE_SHARE_TEXT = "Hey ! Have a look at this awesome picture of a place called %s. If you want " +
-            "other information about the place download this app from play store : " + "play store link";
+            "other information about the place download this app from play store : " + "https://play.google.com/store/apps/details?id=app.nomad.projects.yashasvi.hotspotsforwork";
 
     public static int gpsPermissionDenied = 0;
 

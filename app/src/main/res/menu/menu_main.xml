@@ -16,4 +16,10 @@
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/action_sort"
+        android:title="sort"
+        android:icon="@drawable/sort24"
+        app:showAsAction="always"
+        />
 </menu>
