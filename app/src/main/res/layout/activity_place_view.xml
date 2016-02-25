@@ -166,7 +166,7 @@
                                 android:layout_marginStart="30dp"
                                 android:background="@android:color/transparent"
                                 android:padding="5dp"
-                                android:src="@drawable/phone1"
+                                android:src="@drawable/phone24"
                                 android:tint="@color/colorPrimary" />
 
                         </LinearLayout>

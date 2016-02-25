@@ -279,6 +279,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         myShareIntent.putExtra(Intent.EXTRA_TEXT, String.format(Constants.PLACE_SHARE_TEXT, place.getName(), place.getWifiSpeed()));
         setShareIntent(myShareIntent);
 
+        MenuItem sortItem = menu.findItem(R.id.action_sort);
+        sortItem.setVisible(false);
+
         // Return true to display menu
         return true;
     }

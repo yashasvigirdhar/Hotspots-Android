@@ -175,6 +175,8 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
+        MenuItem sortItem = menu.findItem(R.id.action_sort);
+        sortItem.setVisible(false);
         // Return true to display menu
         return true;
     }
