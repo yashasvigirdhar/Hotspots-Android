@@ -20,6 +20,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -69,8 +70,12 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     private Toast toast = null;
 
+    DrawerLayout drawerLayout;
+
     CoordinatorLayout coordinatorLayout;
     SwipeRefreshLayout swipeRefreshLayout;
+
+    FragmentDrawer drawerFragment;
 
     InternetCheck internetCheck;
 
@@ -169,6 +174,8 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     private void initialize() {
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbarPlacesList);
 
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_places_list);
+
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorPlacesList);
 
         setSupportActionBar(mToolbar);
@@ -183,9 +190,9 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         title.setText(city);
         mToolbar.findViewById(R.id.ll_toolbarPlacesList).setOnClickListener(this);
 
-        FragmentDrawer drawerFragment = (FragmentDrawer)
+        drawerFragment = (FragmentDrawer)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
+        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout_places_list), mToolbar);
         drawerFragment.setDrawerListener(this);
 
         places = new ArrayList<>();
@@ -345,6 +352,10 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawers();
+            return;
+        }
         super.onBackPressed();
         return;
     }
@@ -516,7 +527,8 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                     Log.i(LOG_TAG, "onQueryTextSubmit : query : " + query);
                     if (query.isEmpty())
                         mAdapter.flushFilter();
-                    mAdapter.setFilter(query);
+                    else
+                        mAdapter.setFilter(query);
                     return true;
                 }
 
@@ -525,21 +537,33 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                     Log.i(LOG_TAG, "onQueryTextChange : query : " + query);
                     if (query.isEmpty())
                         mAdapter.flushFilter();
-                    mAdapter.setFilter(query);
+                    else
+                        mAdapter.setFilter(query);
                     return true;
                 }
             });
 
             //TODO : check if it works with previous version of android
 
+            searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                @Override
+                public boolean onClose() {
+                    Log.i(LOG_TAG, "Search closed");
+                    mAdapter.flushFilter();
+                    return false;
+                }
+            });
+
             MenuItemCompat.setOnActionExpandListener(item, new MenuItemCompat.OnActionExpandListener() {
                 @Override
                 public boolean onMenuItemActionExpand(MenuItem item) {
+                    Log.i(LOG_TAG, "Search expanded");
                     return true;
                 }
 
                 @Override
                 public boolean onMenuItemActionCollapse(MenuItem item) {
+                    Log.i(LOG_TAG, "Search closed");
                     mAdapter.flushFilter();
                     return true;
                 }
