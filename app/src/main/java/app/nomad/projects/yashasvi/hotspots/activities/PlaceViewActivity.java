@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -92,6 +92,8 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     private Place place = null;
     private Timings timings = null;
 
+    Snackbar internetSnackbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +114,6 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
         day = Constants.days.get(Calendar.getInstance().get(Calendar.DAY_OF_WEEK));
 
-
         toolbar = (Toolbar) findViewById(R.id.technique_three_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -131,8 +132,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         recyclerViewPlaceMenuSmallImages.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         tvTiming = (TextView) findViewById(R.id.tvPlaceTimingsValue);
+
         ibTimingExpand = (ImageButton) findViewById(R.id.ibTimingExpand);
+        ibTimingExpand.setVisibility(View.INVISIBLE);
         ibTimingExpand.setOnClickListener(this);
+
         tvAddress = (TextView) findViewById(R.id.tvPlaceAddressValue);
         tvPhone = (TextView) findViewById(R.id.tvPlacePhoneValue);
 
@@ -148,6 +152,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         tvWifiValue = (TextView) findViewById(R.id.tvWifiValue);
 
         tvMoreImages = (TextView) findViewById(R.id.tvMoreImages);
+        tvMoreImages.setVisibility(View.INVISIBLE);
         tvMoreImages.setOnClickListener(this);
 
         tvChargingPoints = (TextView) findViewById(R.id.tvChargingPointsValue);
@@ -176,7 +181,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
         tvAddress.setText(place.getAddress());
         tvAmbiance.setText(String.valueOf(place.getAmbiance()));
-        tvStaffValue.setText(place.getService()+"/5");
+        tvStaffValue.setText(place.getService() + "/5");
         tvChargingPoints.setText(Constants.chargingPointsLevel.get(Integer.parseInt(place.getChargingPoints())));
 
         tvWifiValue.setText(Constants.wifiSpeedLevel.get(Double.parseDouble(place.getWifiSpeed())));
@@ -269,6 +274,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setVisible(false);
 
+        MenuItem refreshItem = menu.findItem(R.id.menu_refresh);
+        refreshItem.setVisible(false);
+
         // Locate MenuItem with ShareActionProvider
         MenuItem item = menu.findItem(R.id.action_share);
 
@@ -351,6 +359,8 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 ivPlaceCover.setImageBitmap(bt);
                 ivPlaceCover.setOnClickListener(PlaceViewActivity.this);
             } else if (type == ImageType.PLACE) {
+                if (!tvMoreImages.isShown())
+                    tvMoreImages.setVisibility(View.VISIBLE);
                 Log.i(LOG_TAG, "adding small image");
                 placeSmallImageBitmaps.add(bt);
                 placeSmallImagesAdapter.notifyDataSetChanged();
@@ -385,11 +395,12 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
             try {
                 timings = new Gson().fromJson(jsonString, Timings.class);
                 if (timings != null) {
+                    ibTimingExpand.setVisibility(View.VISIBLE);
                     Log.i(LOG_TAG, timings.toString());
                     tvTiming.setText(day + " : " + timings.getTuesday());
                 }
-            } catch (JsonSyntaxException e) {
-                //not able to parse response, after requesting timings
+            } catch (Exception e) {
+                Log.i(LOG_TAG, e.toString());
             }
 
         }

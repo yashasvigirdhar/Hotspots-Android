@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    android:id="@+id/coordinatorAppFeedback"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/my_appbar_container"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="55dp"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -17,7 +20,7 @@
             layout="@layout/toolbar" />
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -80,7 +83,8 @@
                                 android:adjustViewBounds="true"
                                 android:background="@android:color/transparent"
                                 android:scaleType="centerInside"
-                                android:src="@drawable/happy_face_normal" />
+                                app:srcCompat="@drawable/happy_face_normal"
+                                tools:ignore="MissingPrefix" />
                         </RelativeLayout>
 
                         <RelativeLayout
@@ -96,7 +100,8 @@
                                 android:adjustViewBounds="true"
                                 android:background="@android:color/transparent"
                                 android:scaleType="centerInside"
-                                android:src="@drawable/straight_face_normal" />
+                                app:srcCompat="@drawable/straight_face_normal"
+                                tools:ignore="MissingPrefix" />
                         </RelativeLayout>
 
                         <RelativeLayout
@@ -113,7 +118,8 @@
                                 android:adjustViewBounds="true"
                                 android:background="@android:color/transparent"
                                 android:scaleType="centerInside"
-                                android:src="@drawable/sad_face_normal" />
+                                app:srcCompat="@drawable/sad_face_normal"
+                                tools:ignore="MissingPrefix" />
 
                         </RelativeLayout>
                     </LinearLayout>
@@ -198,5 +204,5 @@
 
 
         </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+    </ScrollView>
 </android.support.design.widget.CoordinatorLayout>

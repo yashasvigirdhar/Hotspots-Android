@@ -169,6 +169,9 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setVisible(false);
 
+        MenuItem refreshItem = menu.findItem(R.id.menu_refresh);
+        refreshItem.setVisible(false);
+
         // Locate MenuItem with ShareActionProvider
         MenuItem item = menu.findItem(R.id.action_share);
 

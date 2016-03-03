@@ -1,8 +1,12 @@
 package app.nomad.projects.yashasvi.hotspots.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +28,7 @@ import java.net.HttpURLConnection;
 import app.nomad.projects.yashasvi.hotspots.R;
 import app.nomad.projects.yashasvi.hotspots.models.PlaceFeedback;
 import app.nomad.projects.yashasvi.hotspots.enums.FeedbackType;
+import app.nomad.projects.yashasvi.hotspots.utils.Constants;
 import app.nomad.projects.yashasvi.hotspots.utils.ServerHelperFunctions;
 
 public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnClickListener {
@@ -34,6 +39,8 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
 
     private int place_id;
     private String placeName;
+
+    CoordinatorLayout coordinatorLayout;
 
     private Toolbar toolbar;
 
@@ -54,6 +61,9 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
 
     private int feeling = -1;
 
+    Snackbar internetSnackbar;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +81,7 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(placeName);
 
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorPlaceFeedback);
 
         ibHappy = (ImageButton) findViewById(R.id.ibFeelingHappy);
         ibStraight = (ImageButton) findViewById(R.id.ibFeelingStraight);
@@ -192,12 +203,24 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
         @Override
         protected void onPostExecute(String responseFromServer) {
             super.onPostExecute(responseFromServer);
-            Log.i(TAG, String.valueOf(responseFromServer));
-            if (Integer.parseInt(responseFromServer) == HttpURLConnection.HTTP_OK) {
+            Log.i(TAG, "onPostExecute");
+            Log.i(TAG, "responsefromserver : " + responseFromServer);
+            if (responseFromServer.contains("Exception")) {
+                internetSnackbar = Snackbar
+                        .make(coordinatorLayout, "Please check your Internet Connection and try again.", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("SETTINGS", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                startActivityForResult(new Intent(Settings.ACTION_SETTINGS), Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS);
+                            }
+                        })
+                        .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                internetSnackbar.show();
+                return;
+            }
+            if (responseFromServer.equals(String.valueOf(HttpURLConnection.HTTP_OK))) {
                 Toast.makeText(mContext, "Thanks! Your feedback has been submitted", Toast.LENGTH_SHORT).show();
                 finish();
-            } else {
-                Toast.makeText(mContext, responseFromServer, Toast.LENGTH_SHORT).show();
             }
 
         }

@@ -18,8 +18,13 @@
 
     <item
         android:id="@+id/action_sort"
+        android:icon="@drawable/sort_variant_vector"
         android:title="sort"
-        android:icon="@drawable/sort24"
-        app:showAsAction="always"
-        />
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_refresh"
+        android:title="Refresh"
+        app:showAsAction="never" />
+
 </menu>

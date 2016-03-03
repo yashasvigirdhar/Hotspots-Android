@@ -1,7 +1,6 @@
 package app.nomad.projects.yashasvi.hotspots.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -13,8 +12,6 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,6 +22,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -50,34 +48,38 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import app.nomad.projects.yashasvi.hotspots.R;
 import app.nomad.projects.yashasvi.hotspots.adapters.PlacesRecyclerViewAdapter;
+import app.nomad.projects.yashasvi.hotspots.enums.ConnectionAvailability;
+import app.nomad.projects.yashasvi.hotspots.enums.InternetCheck;
 import app.nomad.projects.yashasvi.hotspots.fragments.FragmentDrawer;
 import app.nomad.projects.yashasvi.hotspots.models.Place;
+import app.nomad.projects.yashasvi.hotspots.utils.CheckInternetAsyncTask;
 import app.nomad.projects.yashasvi.hotspots.utils.Constants;
 import app.nomad.projects.yashasvi.hotspots.utils.LocationHelper;
-import app.nomad.projects.yashasvi.hotspots.utils.MyLinearLayoutManager;
 import app.nomad.projects.yashasvi.hotspots.utils.ServerHelperFunctions;
 
 
-public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener, View.OnClickListener, FragmentDrawer.FragmentDrawerListener {
+public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener, View.OnClickListener, FragmentDrawer.FragmentDrawerListener, SwipeRefreshLayout.OnRefreshListener {
 
     private final static String LOG_TAG = "PlacesListActivity";
     private String city = "";
 
-    boolean doubleBackToExitPressedOnce = false;
-
     private Toast toast = null;
 
     CoordinatorLayout coordinatorLayout;
+    SwipeRefreshLayout swipeRefreshLayout;
+
+    InternetCheck internetCheck;
 
     private RecyclerView mRecyclerView;
     private PlacesRecyclerViewAdapter mAdapter;
 
     private LocationHelper locationHelper = null;
 
-    private ArrayList<Place> places;
+    private List<Place> places;
     private List<Float> distances;
 
     private ProgressDialog pd;
@@ -85,10 +87,12 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     AlertDialog.Builder dialogBuilder;
     AlertDialog sortDialog;
 
-    private Boolean areDistanceCalculated;
+    private Boolean areDistancesCalculated;
     HashMap<Integer, Float> placeDistances;
 
-    RadioButton rbDistance, rbWifi, rbFood, rbRating;
+    RadioButton rbDistance, rbWifi, rbRating;
+
+    Snackbar internetSnackbar, gpsSnackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,13 +102,53 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         Intent callingIntent = getIntent();
         if (callingIntent != null && callingIntent.getStringExtra("city") != null)
             city = callingIntent.getStringExtra("city");
+
         initialize();
+        if (callingIntent != null)
+            internetCheck = InternetCheck.valueOf(callingIntent.getStringExtra("internetChecked"));
+        Log.i(LOG_TAG, "internetChecked : " + internetCheck);
         getPlaces();
     }
 
     private void getPlaces() {
-        pd = ProgressDialog.show(this, "Loading..", "Please wait", true, true);
-        new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity(city)).execute();
+        Log.i(LOG_TAG, "getPlaces()");
+
+        if (internetCheck == InternetCheck.CHECKED) {
+            if (!swipeRefreshLayout.isRefreshing()) {
+                pd = ProgressDialog.show(this, "Please wait", "Fetching you the list of places", true, true);
+            }
+            new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity(city)).execute();
+            return;
+        }
+
+        Log.i(LOG_TAG, "checking for internet connection");
+
+        ConnectionAvailability isInternetAvailable = null;
+        try {
+            isInternetAvailable = new CheckInternetAsyncTask(this).execute().get(2L, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (isInternetAvailable == ConnectionAvailability.INTERNET_AVAILABLE) {
+            internetCheck = InternetCheck.CHECKED;
+            if (!swipeRefreshLayout.isRefreshing())
+                pd = ProgressDialog.show(this, "Please wait", "Fetching you the list of places", true, true);
+            new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity(city)).execute();
+        } else {
+            if (swipeRefreshLayout.isRefreshing())
+                swipeRefreshLayout.setRefreshing(false);
+            internetSnackbar = Snackbar
+                    .make(coordinatorLayout, "Check Internet Connection and swipe down to refresh.", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("SETTINGS", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS);
+                        }
+                    })
+                    .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+            internetSnackbar.show();
+        }
     }
 
     @Override
@@ -120,8 +164,6 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             mAdapter.setFilter(query);
             return;
         }
-        if (places == null)
-            getPlaces();
     }
 
     private void initialize() {
@@ -132,7 +174,10 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        areDistanceCalculated = false;
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeFreshPlaces);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
+        areDistancesCalculated = false;
 
         TextView title = (TextView) mToolbar.findViewById(R.id.tv_toolbar_title);
         title.setText(city);
@@ -149,9 +194,8 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(new MyLinearLayoutManager(this));
-        mRecyclerView.setNestedScrollingEnabled(false);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        //mRecyclerView.setNestedScrollingEnabled(false);
         mAdapter = new PlacesRecyclerViewAdapter(places, distances, this);
         mAdapter.setOnPlaceClickedListener(this);
         mRecyclerView.setAdapter(mAdapter);
@@ -167,6 +211,8 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.sort_dialog, null);
         dialogBuilder.setView(dialogView);
+        sortDialog = dialogBuilder.create();
+
         rbDistance = (RadioButton) dialogView.findViewById(R.id.radioBDistance);
         rbDistance.setOnClickListener(this);
 
@@ -175,10 +221,12 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
         rbRating = (RadioButton) dialogView.findViewById(R.id.radioBRating);
         rbRating.setOnClickListener(this);
-        sortDialog = dialogBuilder.create();
+
     }
 
     private void calculatePlacesDistance() {
+        if (gpsSnackbar != null && gpsSnackbar.isShownOrQueued())
+            gpsSnackbar.dismiss();
         Location placeLocation;
         Float distance;
         Place place;
@@ -193,14 +241,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             placeDistances.put(place.getId(), distance);
         }
         mAdapter.notifyDataSetChanged();
-        areDistanceCalculated = true;
-
-    }
-
-    public boolean isConnected() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return (networkInfo != null && networkInfo.isConnected());
+        areDistancesCalculated = true;
 
     }
 
@@ -250,7 +291,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             case R.id.radioBDistance:
                 rbRating.setChecked(false);
                 rbWifi.setChecked(false);
-                if (areDistanceCalculated) {
+                if (areDistancesCalculated) {
                     Collections.sort(places, new Comparator<Place>() {
                         @Override
                         public int compare(Place lhs, Place rhs) {
@@ -258,16 +299,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                         }
                     });
                     calculatePlacesDistance();
-//                    Log.i(LOG_TAG, "after sorting by distance");
-//                    for (int idx = 0; idx < places.size(); idx++) {
-//                        Log.i(LOG_TAG, places.get(idx).toString());
-//                    }
-//                    mAdapter.notifyDataSetChanged();
-                    if (sortDialog.isShowing())
-                        sortDialog.cancel();
                 } else {
-                    Toast.makeText(PlacesListActivity.this, "Please wait while the distances are being calculated", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PlacesListActivity.this, "Distances not calculated yet", Toast.LENGTH_SHORT).show();
                 }
+                if (sortDialog.isShowing())
+                    sortDialog.cancel();
                 break;
             case R.id.radioBRating:
                 rbDistance.setChecked(false);
@@ -278,12 +314,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                         return rhs.getRating().compareTo(lhs.getRating());
                     }
                 });
-                calculatePlacesDistance();
-                //Log.i(LOG_TAG, "after sorting by rating");
-//                for (int idx = 0; idx < places.size(); idx++) {
-//                    Log.i(LOG_TAG, places.get(idx).toString());
-//                }
-                //mAdapter.notifyDataSetChanged();
+
+                if (areDistancesCalculated)
+                    calculatePlacesDistance();
+                else
+                    mAdapter.notifyDataSetChanged();
                 if (sortDialog.isShowing())
                     sortDialog.cancel();
                 break;
@@ -296,12 +331,12 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                         return rhs.getWifiSpeed().compareTo(lhs.getWifiSpeed());
                     }
                 });
-                calculatePlacesDistance();
-//                Log.i(LOG_TAG, "after sorting by wifi");
-//                for (int idx = 0; idx < places.size(); idx++) {
-//                    Log.i(LOG_TAG, places.get(idx).toString());
-//                }
-//                mAdapter.notifyDataSetChanged();
+
+                if (areDistancesCalculated)
+                    calculatePlacesDistance();
+                else
+                    mAdapter.notifyDataSetChanged();
+
                 if (sortDialog.isShowing())
                     sortDialog.cancel();
                 break;
@@ -346,6 +381,16 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         }
     }
 
+    @Override
+    public void onRefresh() {
+        Log.i(LOG_TAG, "onRefresh()");
+        refreshPlaces();
+    }
+
+    private void refreshPlaces() {
+        getPlaces();
+    }
+
     public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {
 
         private final String mUrl;
@@ -367,17 +412,34 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             if (pd != null && pd.isShowing()) {
                 pd.dismiss();
             }
+            if (swipeRefreshLayout.isRefreshing())
+                swipeRefreshLayout.setRefreshing(false);
+            Log.i(LOG_TAG, "onPostExecute");
+            Log.i(LOG_TAG, jsonString);
             if (jsonString.contains("Exception")) {
-                Toast.makeText(PlacesListActivity.this, "Unable to fetch places. Please check your connectivity and try again.", Toast.LENGTH_SHORT).show();
+                internetSnackbar = Snackbar
+                        .make(coordinatorLayout, "Check Internet Connection and swipe down to refresh.", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("SETTINGS", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS);
+                            }
+                        })
+                        .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                internetSnackbar.show();
                 return;
             }
             Type collectionType = new TypeToken<List<Place>>() {
             }.getType();
             try {
                 List<Place> receivedPlaces = (ArrayList<Place>) new Gson().fromJson(jsonString, collectionType);
-                for (int i = 0; i < receivedPlaces.size(); i++)
-                    places.add(receivedPlaces.get(i));
+                Log.i(LOG_TAG, "updating adapter data");
+                places = receivedPlaces;
+                mAdapter.updateData(receivedPlaces);
                 mAdapter.notifyDataSetChanged();
+
+                if (internetSnackbar != null && internetSnackbar.isShownOrQueued())
+                    internetSnackbar.dismiss();
                 locationHelper.checkPermissionAndgetLocation();
                 for (int i = 0; i < places.size(); i++)
                     Log.i(LOG_TAG, places.get(i).toString());
@@ -400,7 +462,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                 } else {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(PlacesListActivity.this,
                             Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        Snackbar snackbar = Snackbar
+                        gpsSnackbar = Snackbar
                                 .make(coordinatorLayout, "To show the distances of places, gps permission is required", Snackbar.LENGTH_INDEFINITE)
                                 .setAction("ALLOW", new View.OnClickListener() {
                                     @Override
@@ -411,10 +473,10 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                                     }
                                 })
                                 .setActionTextColor(getResources().getColor(R.color.colorPrimary));
-                        snackbar.show();
+                        gpsSnackbar.show();
                         break;
                     }
-                    Snackbar snackbar = Snackbar
+                    gpsSnackbar = Snackbar
                             .make(coordinatorLayout, "To show the distances of places, gps permission is required", Snackbar.LENGTH_INDEFINITE)
                             .setAction("SETTINGS", new View.OnClickListener() {
                                 @Override
@@ -425,7 +487,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                                 }
                             })
                             .setActionTextColor(getResources().getColor(R.color.colorPrimary));
-                    snackbar.show();
+                    gpsSnackbar.show();
                 }
                 break;
         }
@@ -435,12 +497,12 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        MenuItem shareItem = menu.findItem(R.id.action_share);
-        shareItem.setVisible(false);
+        MenuItem item = menu.findItem(R.id.action_share);
+        item.setVisible(false);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
-        final MenuItem item = menu.findItem(R.id.action_search);
+        item = menu.findItem(R.id.action_search);
 
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
 
@@ -497,7 +559,17 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             case R.id.action_sort:
                 sortDialog.show();
                 return true;
+            case R.id.menu_refresh:
+                Log.i(LOG_TAG, "Refresh menu item selected");
 
+                // Signal SwipeRefreshLayout to start the progress indicator
+                swipeRefreshLayout.setRefreshing(true);
+
+                // Start the refresh background task.
+                // This method calls setRefreshing(false) when it's finished.
+                refreshPlaces();
+
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -510,12 +582,17 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             case Constants.REQUEST_CODE_INTENT_GPS_SETTINGS:
                 locationHelper.updateIsGpsEnabled();
                 locationHelper.getLocationFromSystem();
+                locationHelper.dissmissSnackbar();
                 break;
             case Constants.REQUEST_CODE_INTENT_APP_SETTINGS:
                 int hasGpsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
                 if (hasGpsPermission == PackageManager.PERMISSION_GRANTED) {
                     locationHelper.getLocationFromSystem();
                 }
+                locationHelper.dissmissSnackbar();
+                break;
+            case Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS:
+                getPlaces();
                 break;
         }
     }

@@ -33,6 +33,8 @@ public class LocationHelper {
     private double latitude = -1;
     private double longitude = -1;
 
+    Snackbar snackbar;
+
 
     // flag for GPS status
     private boolean isGPSEnabled = false;
@@ -94,7 +96,7 @@ public class LocationHelper {
                 }
             }
         } else {
-            Snackbar snackbar = Snackbar
+            snackbar = Snackbar
                     .make(coordinatorLayout, "You need to enable gps to show distances", Snackbar.LENGTH_INDEFINITE)
                     .setAction("SETTINGS", new View.OnClickListener() {
                         @Override
@@ -110,6 +112,11 @@ public class LocationHelper {
 
     public interface GpsListener {
         void updateGpsLocation();
+    }
+
+    public void dissmissSnackbar(){
+        if(snackbar.isShown())
+            snackbar.dismiss();
     }
 
 }

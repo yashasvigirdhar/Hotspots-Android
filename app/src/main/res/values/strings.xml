@@ -14,7 +14,7 @@
     <string name="err_msg_email">Enter valid email address</string>
     <string name="err_msg_message">Enter the message</string>
 
-    <string name="hint_search">Search place</string>
+    <string name="hint_search">Search Restaurant</string>
 
 
     <string name="place_feedback_feeling">How are you feeling?</string>

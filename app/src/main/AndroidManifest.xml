@@ -65,8 +65,6 @@
                 android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
         </activity>
 
-        <activity android:name="app.nomad.projects.yashasvi.hotspots.activities.ZomatoWebviewActivity" />
-
         <activity
             android:name="app.nomad.projects.yashasvi.hotspots.activities.PlaceImagesActivity"
             android:launchMode="singleTop"

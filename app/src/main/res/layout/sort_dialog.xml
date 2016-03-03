@@ -10,7 +10,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="5dp"
         card_view:cardBackgroundColor="@color/cardsBackground"
         card_view:cardCornerRadius="2dp"
         card_view:contentPadding="10dp">
@@ -18,37 +17,42 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Sort places by"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <RadioButton
                 android:id="@+id/radioBDistance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
                 android:layout_margin="5dp"
+                android:padding="5dp"
                 android:text="Distance"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="16sp" />
 
             <RadioButton
                 android:id="@+id/radioBWifi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
                 android:layout_margin="5dp"
+                android:padding="5dp"
                 android:text="Wifi"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="16sp" />
 
             <RadioButton
                 android:id="@+id/radioBRating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
                 android:layout_margin="5dp"
+                android:padding="5dp"
                 android:text="Rating"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="16sp" />
         </LinearLayout>
     </android.support.v7.widget.CardView>

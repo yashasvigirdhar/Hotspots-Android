@@ -16,6 +16,8 @@ public class Constants {
 
     final public static int REQUEST_CODE_INTENT_APP_SETTINGS = 4;
 
+    final public static int REQUEST_CODE_INTENT_NETWORK_SETTINGS = 5;
+
     // The minimum distance to change updates in metters
     public static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
 
@@ -50,8 +52,6 @@ public class Constants {
 
     public static final String VERSION_NO = "1.0";
 
-    public static final String ABOUT_DESCRIPTION = "Hotspots aims to provide you an extremely easy way to " +
-            "discover places in a city where you can take your laptop, when you are tired of " +
-            "applying wifi filter on other places.";
+    public static final String ABOUT_DESCRIPTION = "Hotspots provides you an extremely easy way to discover places where you can work from.";
 
 }

@@ -1,12 +1,20 @@
 package app.nomad.projects.yashasvi.hotspots.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import app.nomad.projects.yashasvi.hotspots.enums.AppStart;
+import app.nomad.projects.yashasvi.hotspots.enums.ConnectionAvailability;
 import app.nomad.projects.yashasvi.hotspots.enums.ImageSize;
 import app.nomad.projects.yashasvi.hotspots.enums.ImageType;
 import app.nomad.projects.yashasvi.hotspots.models.Timings;
@@ -95,4 +103,35 @@ public class UtilFunctions {
         str += "\n";
         return str;
     }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Activity.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnectedOrConnecting());
+
+    }
+
+    public static ConnectionAvailability hasActiveInternetConnection(Context context) {
+        if (isNetworkAvailable(context)) {
+            try {
+                Log.i(LOG_TAG, "checking for internet connection");
+                HttpURLConnection urlc = (HttpURLConnection) (new URL("http://clients3.google.com/generate_204").openConnection());
+                urlc.setRequestProperty("User-Agent", "Android");
+                urlc.setRequestProperty("Connection", "close");
+                urlc.setConnectTimeout(1500);
+                urlc.connect();
+                if (urlc.getResponseCode() == 204 &&
+                        urlc.getContentLength() == 0) {
+                    Log.i(LOG_TAG, "internet connection is available");
+                    return ConnectionAvailability.INTERNET_AVAILABLE;
+                } else
+                    return ConnectionAvailability.INTERNET_NOT_AVAILABLE;
+            } catch (IOException e) {
+                return ConnectionAvailability.INTERNET_NOT_AVAILABLE;
+            }
+        } else {
+            return ConnectionAvailability.NETWORK_NOT_AVAILABLE;
+        }
+    }
+
 }

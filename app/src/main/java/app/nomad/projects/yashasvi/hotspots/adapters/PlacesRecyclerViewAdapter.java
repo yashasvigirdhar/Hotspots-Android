@@ -29,10 +29,10 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
 
     private final static String LOG_TAG = "PlacesRecyclerAdapter";
 
-    private final Context mContext;
+    private Context mContext;
     private List<Place> mDataset;
-    private final List<Place> all_Places;
-    private final List<Float> distances;
+    private List<Place> all_Places;
+    private List<Float> distances;
 
     private static OnPlaceClickedListener onPlaceClickedListener;
 
@@ -51,10 +51,6 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
     public DataObjectHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.place_card, parent, false);
-//        WindowManager windowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-//        int height = windowManager.getDefaultDisplay().getHeight();
-//        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-//        rootView.setLayoutParams(lp);
         return new DataObjectHolder(rootView);
     }
 
@@ -219,6 +215,12 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
             if (item.getName().toLowerCase().contains(constraint))
                 mDataset.add(item);
         }
+        notifyDataSetChanged();
+    }
+
+    public void updateData(List<Place> data) {
+        mDataset = data;
+        all_Places = data;
         notifyDataSetChanged();
     }
 

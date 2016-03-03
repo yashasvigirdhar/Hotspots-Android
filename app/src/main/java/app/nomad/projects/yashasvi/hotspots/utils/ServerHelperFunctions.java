@@ -28,7 +28,7 @@ public class ServerHelperFunctions {
         return ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.CITY_PATH + city;
     }
 
-    public static String getTimingsUriFromId(String id){
+    public static String getTimingsUriFromId(String id) {
         return ServerConstants.SERVER_URL + ServerConstants.REST_API_PATH + ServerConstants.TIMINGS_BY_ID + id;
     }
 
@@ -132,7 +132,7 @@ public class ServerHelperFunctions {
 
         } catch (Exception ex) {
             Log.e(LOG_TAG, ex.toString());
-            return String.valueOf(status);
+            return ex.toString();
         } finally {
             if (connection != null) {
                 try {
