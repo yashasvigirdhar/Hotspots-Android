@@ -446,7 +446,6 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                 Log.i(LOG_TAG, "updating adapter data");
                 places = receivedPlaces;
                 mAdapter.updateData(receivedPlaces);
-                mAdapter.notifyDataSetChanged();
 
                 if (internetSnackbar != null && internetSnackbar.isShownOrQueued())
                     internetSnackbar.dismiss();

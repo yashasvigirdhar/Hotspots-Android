@@ -421,9 +421,9 @@
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="5dp">
 
@@ -438,23 +438,32 @@
                         android:textColor="@color/colorAccent"
                         android:textSize="17sp" />
 
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/tvPhotosFallback"
                         android:layout_width="match_parent"
-                        android:layout_height="65dp">
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tvPlacePhotoskey"
+                        android:text="Not available"
+                        android:textSize="16sp"/>
+
+                    <LinearLayout
+                        android:layout_below="@id/tvPlacePhotoskey"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
                         <android.support.v7.widget.RecyclerView
                             android:id="@+id/recyclerViewPhotosPlaceViewPage"
                             android:layout_width="0dp"
-                            android:layout_height="65dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="0.6" />
 
                         <TextView
                             android:id="@+id/tvMoreImages"
                             style="@android:style/Widget.Button"
                             android:layout_width="61dp"
-                            android:layout_height="61dp" />
+                            android:layout_height="0dp" />
                     </LinearLayout>
-                </LinearLayout>
+                </RelativeLayout>
 
             </android.support.v7.widget.CardView>
 
@@ -467,13 +476,14 @@
                 card_view:cardCornerRadius="2dp"
                 card_view:contentPadding="10dp">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="110dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="5dp">
 
                     <RelativeLayout
+                        android:id="@+id/layoutFoodHeading"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -488,13 +498,14 @@
                             android:textAllCaps="true"
                             android:textColor="@color/colorAccent"
                             android:textSize="17sp" />
+
                         <TextView
                             android:id="@+id/tvPlaceFoodRating"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-black"
                             android:layout_alignParentRight="true"
-                            android:padding="5dp"
+                            android:fontFamily="sans-serif-black"
+                            android:paddingBottom="5dp"
                             android:text="4.2"
                             android:textAllCaps="true"
                             android:textColor="@color/colorAccent"
@@ -502,11 +513,20 @@
 
                     </RelativeLayout>
 
+                    <TextView
+                        android:id="@+id/tvFoodMenuFallback"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/layoutFoodHeading"
+                        android:text="Menu not available"
+                        android:textSize="16sp"/>
+
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/recyclerViewMenuPlaceViewPage"
                         android:layout_width="match_parent"
-                        android:layout_height="65dp" />
-                </LinearLayout>
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/layoutFoodHeading" />
+                </RelativeLayout>
 
             </android.support.v7.widget.CardView>
 

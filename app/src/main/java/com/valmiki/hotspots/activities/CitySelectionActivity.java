@@ -8,13 +8,15 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -35,19 +37,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class CitySelectionActivity extends AppCompatActivity implements CitiesRecyclerViewAdapter.MyClickListener {
+public class CitySelectionActivity extends AppCompatActivity implements CitiesRecyclerViewAdapter.MyClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     private final static String LOG_TAG = "CitySelectionActivity";
 
-    final int REQUEST_CODE = 1;
-
     CoordinatorLayout coordinatorLayout;
+
+    SwipeRefreshLayout swipeRefreshLayout;
+
     private RecyclerView mRecyclerView;
     private CitiesRecyclerViewAdapter mAdapter;
 
-    private ArrayList<Place> places;
+    private List<Place> places;
 
     private ProgressDialog pd;
+
+    Snackbar internetSnackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,11 +120,16 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
             e.printStackTrace();
         }
         if (isInternetAvailable == ConnectionAvailability.INTERNET_AVAILABLE) {
-            pd = ProgressDialog.show(this, "Please wait", "Fetching you the list of cities", true, true);
+            if (!swipeRefreshLayout.isRefreshing()) {
+                pd = ProgressDialog.show(this, "Please wait", "Fetching you the list of cities", true, true);
+            }
             new GetPlacesAsyncTask(ServerHelperFunctions.getPlacesUrlByCity("city")).execute();
+            return;
         } else {
-            Snackbar snackbar = Snackbar
-                    .make(coordinatorLayout, "Please check your Internet Connection.", Snackbar.LENGTH_INDEFINITE)
+            if (swipeRefreshLayout.isRefreshing())
+                swipeRefreshLayout.setRefreshing(false);
+            internetSnackbar = Snackbar
+                    .make(coordinatorLayout, "Check Internet Connection and swipe down to refresh.", Snackbar.LENGTH_INDEFINITE)
                     .setAction("SETTINGS", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -127,12 +137,15 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
                         }
                     })
                     .setActionTextColor(getResources().getColor(R.color.colorPrimary));
-            snackbar.show();
+            internetSnackbar.show();
         }
     }
 
     private void initialize() {
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorCityList);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeFreshCities);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbarCityList);
         setSupportActionBar(mToolbar);
@@ -170,6 +183,53 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
         finish();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        MenuItem item = menu.findItem(R.id.action_share);
+        item.setVisible(false);
+
+        item = menu.findItem(R.id.action_search);
+        item.setVisible(false);
+
+
+        item = menu.findItem(R.id.action_sort);
+        item.setVisible(false);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.menu_refresh:
+                Log.i(LOG_TAG, "Refresh menu item selected");
+
+                // Signal SwipeRefreshLayout to start the progress indicator
+                swipeRefreshLayout.setRefreshing(true);
+
+                // Start the refresh background task.
+                // This method calls setRefreshing(false) when it's finished.
+                refreshCities();
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        Log.i(LOG_TAG, "onRefresh()");
+        refreshCities();
+    }
+
+    private void refreshCities() {
+        getCities();
+    }
+
     public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {
 
         private final String mUrl;
@@ -189,27 +249,45 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
             if (pd != null && pd.isShowing()) {
                 pd.dismiss();
             }
+            if (swipeRefreshLayout.isRefreshing())
+                swipeRefreshLayout.setRefreshing(false);
             Log.i(LOG_TAG, "on post execute\n" + jsonString);
             if (jsonString.contains("Exception")) {
-                Toast.makeText(CitySelectionActivity.this, "Unable to get cities. Swipe down to try again.", Toast.LENGTH_SHORT).show();
+                internetSnackbar = Snackbar
+                        .make(coordinatorLayout, "Check Internet Connection and swipe down to refresh.", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("SETTINGS", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS);
+                            }
+                        })
+                        .setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                internetSnackbar.show();
                 return;
             }
             Type collectionType = new TypeToken<List<Place>>() {
             }.getType();
             try {
                 List<Place> tempPlaces = new Gson().fromJson(jsonString, collectionType);
-                for (int i = 0; i < tempPlaces.size(); i++) {
-                    Log.i(LOG_TAG, tempPlaces.get(i).toString());
-                    places.add(tempPlaces.get(i));
-                }
-                mAdapter.notifyDataSetChanged();
-                if (pd != null && pd.isShowing()) {
-                    pd.dismiss();
-                }
+                places = tempPlaces;
+                mAdapter.updateData(places);
+
+                if (internetSnackbar != null && internetSnackbar.isShownOrQueued())
+                    internetSnackbar.dismiss();
             } catch (JsonSyntaxException e) {
                 //not able to parse response, after requesting all places
             }
 
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS:
+                getCities();
+                break;
         }
     }
 

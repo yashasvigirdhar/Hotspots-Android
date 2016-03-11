@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class CitiesRecyclerViewAdapter extends RecyclerView.Adapter<CitiesRecyclerViewAdapter.DataObjectHolder> {
 
-    private final List<Place> mDataset;
+    private List<Place> mDataset;
     private static MyClickListener myClickListener;
 
     public CitiesRecyclerViewAdapter(List<Place> myDataset) {
@@ -34,6 +34,11 @@ public class CitiesRecyclerViewAdapter extends RecyclerView.Adapter<CitiesRecycl
     @Override
     public void onBindViewHolder(DataObjectHolder holder, int position) {
         holder.tvCityName.setText(mDataset.get(position).getName());
+    }
+
+    public void updateData(List<Place> data) {
+        mDataset = data;
+        notifyDataSetChanged();
     }
 
     @Override

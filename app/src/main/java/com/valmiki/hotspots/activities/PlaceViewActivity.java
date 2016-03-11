@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -78,8 +79,10 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     private TextView tvPhone;
     private TextView tvMoreImages;
     private TextView tvFoodRating;
-
     private TextView tvStaffValue;
+
+    private TextView tvFoodMenuFallback;
+    private TextView tvPhotosFallback;
 
     private RecyclerView recyclerViewPlaceSmallImages;
     private PlaceSmallImagesRecyclerViewAdapter placeSmallImagesAdapter;
@@ -204,6 +207,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         bGoToFeedbackScreen = (Button) findViewById(R.id.bGoToPlaceFeedbackScreen);
         bGoToFeedbackScreen.setOnClickListener(this);
 
+        tvFoodMenuFallback = (TextView) findViewById(R.id.tvFoodMenuFallback);
+        tvFoodMenuFallback.setVisibility(View.INVISIBLE);
+
+        tvPhotosFallback = (TextView) findViewById(R.id.tvPhotosFallback);
+        tvPhotosFallback.setVisibility(View.INVISIBLE);
     }
 
     private void populate() {
@@ -233,14 +241,29 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
         imagesCount = place.getImagesCount();
         placeSmallImagesAdapter.updateImagesCount(imagesCount);
-        if(imagesCount > 5)
-            tvMoreImages.setText("+" + String.valueOf(imagesCount - 5));
-        else
-            tvMoreImages.setText("+0");
+        if (imagesCount == 0) {
+            tvMoreImages.setVisibility(View.INVISIBLE);
+            tvPhotosFallback.setVisibility(View.VISIBLE);
+        } else {
+            ViewGroup.LayoutParams params = tvMoreImages.getLayoutParams();
+            float scale = getResources().getDisplayMetrics().density;
+            int pixels = (int) (61 * scale + 0.5f);
+            if (imagesCount > 5) {
+                params.height = pixels;
+                tvMoreImages.setText("+" + String.valueOf(imagesCount - 5));
+            } else if (imagesCount > 3) {
+                params.height = pixels;
+                tvMoreImages.setText("+0");
+            }
+        }
         imagesPath = place.getImagesPath();
         placeSmallImagesAdapter.updateImagesPath(imagesPath);
 
         menuImagesCount = place.getMenuImagesCount();
+
+        if (menuImagesCount == 0)
+            tvFoodMenuFallback.setVisibility(View.VISIBLE);
+
         placeMenuSmallImagesAdapter.updateImagesCount(menuImagesCount);
         placeMenuSmallImagesAdapter.updateImagesPath(imagesPath);
     }
@@ -356,7 +379,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         protected Void doInBackground(Void... params) {
             if (isCancelled())
                 return null;
-            if(imagesCount==0)
+            if (imagesCount == 0 && menuImagesCount == 0)
                 return null;
             String coverImageUrl = ServerHelperFunctions.getPlaceCoverImageUrl(imagesPath, place.getName());
             Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(coverImageUrl);
@@ -364,7 +387,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 publishProgress(bt, ImageType.COVER);
 
             String path;
-            for (int i = 0; i < 5; i++) {
+            int imagesToDownload;
+            imagesToDownload = (imagesCount > 5) ? 5 : imagesCount;
+            for (int i = 0; i < imagesToDownload; i++) {
                 if (isCancelled())
                     return null;
                 bt = ((MyApplication) getApplication()).getBitmapFromCache(UtilFunctions.getImageCacheKey(String.valueOf(place.getId()), ImageType.PLACE, i, ImageSize.THUMBNAIL));
@@ -382,7 +407,8 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                     ((MyApplication) getApplication()).putBitmapInCache(UtilFunctions.getImageCacheKey(String.valueOf(place.getId()), ImageType.PLACE, i, ImageSize.THUMBNAIL), bt);
                 }
             }
-
+            if (menuImagesCount == 0)
+                return null;
             for (int i = 0; i < menuImagesCount; i++) {
                 if (isCancelled())
                     return null;
@@ -450,6 +476,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         protected void onPostExecute(String jsonString) {
             super.onPostExecute(jsonString);
             Log.i(LOG_TAG, "on post execute\n" + jsonString);
+            if (jsonString == "not present") {
+                tvTiming.setText("Timings not available");
+            }
             try {
                 timings = new Gson().fromJson(jsonString, Timings.class);
                 if (timings != null) {

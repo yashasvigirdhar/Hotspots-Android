@@ -39,7 +39,7 @@ public class ServerHelperFunctions {
         Bitmap imageBitmap = null;
         try {
             URL u = new URL(url);
-            Log.i(LOG_TAG,"Downloading image " + u.toString());
+            Log.i(LOG_TAG, "Downloading image " + u.toString());
             imageBitmap = BitmapFactory.decodeStream((InputStream) u.getContent());
             Log.i("image activity", "Download Completed Successfully");
 
@@ -56,7 +56,10 @@ public class ServerHelperFunctions {
             connection = (HttpURLConnection) u.openConnection();
             connection.connect();
             int status = connection.getResponseCode();
-            Log.i(LOG_TAG, "status : " + status);
+            Log.i(LOG_TAG, String.format("status for %s : %s", url, status));
+            if (status == HttpURLConnection.HTTP_NO_CONTENT) {
+                return "not present";
+            }
 
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder sb = new StringBuilder();
@@ -106,7 +109,7 @@ public class ServerHelperFunctions {
             wr.close();
 
             status = connection.getResponseCode();
-            Log.i(LOG_TAG, "status : " + status);
+            Log.i(LOG_TAG, String.format("status for %s : %s", url, status));
             if (status == HttpURLConnection.HTTP_OK) {
                 return String.valueOf(status);
             }
