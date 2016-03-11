@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.nomad.projects.yashasvi.hotspots">
+    package="com.valmiki.hotspots">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -10,14 +10,14 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:name="app.nomad.projects.yashasvi.hotspots.MyApplication"
+        android:name="com.valmiki.hotspots.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
         android:theme="@style/MyMaterialTheme">
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.CitySelectionActivity"
+            android:name="com.valmiki.hotspots.activities.CitySelectionActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,12 +27,12 @@
         </activity>
 
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity"
+            android:name="com.valmiki.hotspots.activities.PlacesListActivity"
             android:launchMode="singleTop"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.CitySelectionActivity">
+            android:parentActivityName="com.valmiki.hotspots.activities.CitySelectionActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.CitySelectionActivity" />
+                android:value="com.valmiki.hotspots.activities.CitySelectionActivity" />
 
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -47,63 +47,63 @@
         </activity>
 
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity"
+            android:name="com.valmiki.hotspots.activities.PlaceViewActivity"
             android:launchMode="singleTop"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
+            android:parentActivityName="com.valmiki.hotspots.activities.PlacesListActivity">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
+                android:value="com.valmiki.hotspots.activities.PlacesListActivity" />
         </activity>
 
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.AppFeedbackActivity"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
+            android:name="com.valmiki.hotspots.activities.AppFeedbackActivity"
+            android:parentActivityName="com.valmiki.hotspots.activities.PlacesListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
+                android:value="com.valmiki.hotspots.activities.PlacesListActivity" />
         </activity>
 
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlaceImagesActivity"
+            android:name="com.valmiki.hotspots.activities.PlaceImagesActivity"
             android:launchMode="singleTop"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity">
+            android:parentActivityName="com.valmiki.hotspots.activities.PlaceViewActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity" />
+                android:value="com.valmiki.hotspots.activities.PlaceViewActivity" />
         </activity>
 
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.PlaceFeedbackActivity"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity">
+            android:name="com.valmiki.hotspots.activities.PlaceFeedbackActivity"
+            android:parentActivityName="com.valmiki.hotspots.activities.PlaceViewActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlaceViewActivity" />
+                android:value="com.valmiki.hotspots.activities.PlaceViewActivity" />
         </activity>
 
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.SuggestNewPlaceActivity"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
+            android:name="com.valmiki.hotspots.activities.SuggestNewPlaceActivity"
+            android:parentActivityName="com.valmiki.hotspots.activities.PlacesListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
+                android:value="com.valmiki.hotspots.activities.PlacesListActivity" />
         </activity>
 
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.FullscreenPlaceImagesActivity"
+            android:name="com.valmiki.hotspots.activities.FullscreenPlaceImagesActivity"
             android:label="@string/title_activity_fullscreen_place_images"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlaceImagesActivity">
+            android:parentActivityName="com.valmiki.hotspots.activities.PlaceImagesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlaceImagesActivity" />
+                android:value="com.valmiki.hotspots.activities.PlaceImagesActivity" />
         </activity>
         <activity
-            android:name="app.nomad.projects.yashasvi.hotspots.activities.AboutMeActivity"
-            android:parentActivityName="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity">
+            android:name="com.valmiki.hotspots.activities.AboutMeActivity"
+            android:parentActivityName="com.valmiki.hotspots.activities.PlacesListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="app.nomad.projects.yashasvi.hotspots.activities.PlacesListActivity" />
+                android:value="com.valmiki.hotspots.activities.PlacesListActivity" />
         </activity>
     </application>
 
