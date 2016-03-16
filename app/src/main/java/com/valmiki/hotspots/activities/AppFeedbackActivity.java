@@ -177,6 +177,10 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
                 feeling = 3;
                 break;
             case R.id.bSendAppFeedback:
+                if (feeling == -1) {
+                    Toast.makeText(AppFeedbackActivity.this, "Please tell us how are you feeling", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 if (!validateName()) {
                     return;
                 }
@@ -186,10 +190,6 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
                 }
 
                 if (!validateMessage()) {
-                    return;
-                }
-                if (feeling == -1) {
-                    Toast.makeText(AppFeedbackActivity.this, "Please tell us how are you feeling", Toast.LENGTH_LONG).show();
                     return;
                 }
                 sendAppFeedbackToServer();

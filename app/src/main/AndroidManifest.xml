@@ -39,10 +39,10 @@
             </intent-filter>
 
             <meta-data
-                android:name="android.app.searchable"
+                android:name="android.com.searchable"
                 android:resource="@xml/searchable" />
             <meta-data
-                android:name="android.app.default_searchable"
+                android:name="android.com.default_searchable"
                 android:value=".activities.PlacesListActivity" />
         </activity>
 

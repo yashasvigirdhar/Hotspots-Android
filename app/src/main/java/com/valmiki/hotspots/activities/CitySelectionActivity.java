@@ -48,7 +48,7 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
     private RecyclerView mRecyclerView;
     private CitiesRecyclerViewAdapter mAdapter;
 
-    private List<Place> places;
+    List<Place> places;
 
     private ProgressDialog pd;
 
@@ -64,7 +64,10 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
                 .getDefaultSharedPreferences(this);
 
         AppStart appStart;
-        String from = getIntent().getStringExtra("from");
+        Intent callingIntent = getIntent();
+        String from = null;
+        if (callingIntent != null)
+            from = getIntent().getStringExtra("from");
         if (from != null && from.equals("places")) {
             appStart = AppStart.FIRST_TIME;
         } else {

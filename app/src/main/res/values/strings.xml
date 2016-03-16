@@ -82,4 +82,6 @@
     <string name="wifi">Wifi</string>
 
     <string name="about_description">Hotspots aims to provide you an extremely easy way to discover places in a city where you can take your laptop, when you are tired of applying wifi filter on other places.</string>
+    <string name="submit_feedback_success">Thanks! Your feedback has been submitted</string>
+    <string name="internet_validation_url">http://clients3.google.com/generate_204</string>
 </resources>

@@ -43,6 +43,7 @@ import com.valmiki.hotspots.utils.ServerConstants;
 import com.valmiki.hotspots.utils.ServerHelperFunctions;
 import com.valmiki.hotspots.utils.UtilFunctions;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -132,9 +133,9 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         if (isInternetAvailable == ConnectionAvailability.INTERNET_AVAILABLE) {
             Log.i(LOG_TAG, "internet available");
             getTimingsAsyncTask = new GetTimingsAsyncTask(ServerHelperFunctions.getTimingsUriFromId(String.valueOf(place.getId())));
-            getTimingsAsyncTask.execute();
+            getTimingsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             downloadImageAsyncTask = new DownloadImageAsyncTask();
-            downloadImageAsyncTask.execute();
+            downloadImageAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else {
             internetSnackbar = Snackbar
                     .make(coordinatorLayout, "Check Internet Connection", Snackbar.LENGTH_INDEFINITE)
@@ -476,7 +477,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         protected void onPostExecute(String jsonString) {
             super.onPostExecute(jsonString);
             Log.i(LOG_TAG, "on post execute\n" + jsonString);
-            if (jsonString == "not present") {
+            if (jsonString == String.valueOf(HttpURLConnection.HTTP_NO_CONTENT)) {
                 tvTiming.setText("Timings not available");
             }
             try {
@@ -497,8 +498,8 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS:
-                new GetTimingsAsyncTask(ServerHelperFunctions.getTimingsUriFromId(String.valueOf(place.getId()))).execute();
-                new DownloadImageAsyncTask().execute();
+                new GetTimingsAsyncTask(ServerHelperFunctions.getTimingsUriFromId(String.valueOf(place.getId()))).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new DownloadImageAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
         }
     }

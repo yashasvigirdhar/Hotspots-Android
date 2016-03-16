@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.enums.AppStart;
 import com.valmiki.hotspots.enums.ConnectionAvailability;
 import com.valmiki.hotspots.enums.ImageSize;
@@ -17,6 +18,7 @@ import com.valmiki.hotspots.models.Timings;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -115,19 +117,30 @@ public class UtilFunctions {
         if (isNetworkAvailable(context)) {
             try {
                 Log.i(LOG_TAG, "checking for internet connection");
-                HttpURLConnection urlc = (HttpURLConnection) (new URL("http://clients3.google.com/generate_204").openConnection());
+                HttpURLConnection urlc = (HttpURLConnection) (new URL(context.getString(R.string.internet_validation_url)).openConnection());
                 urlc.setRequestProperty("User-Agent", "Android");
                 urlc.setRequestProperty("Connection", "close");
                 urlc.setConnectTimeout(1500);
                 urlc.connect();
-                if (urlc.getResponseCode() == 204 &&
+                if (urlc.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT &&
                         urlc.getContentLength() == 0) {
                     Log.i(LOG_TAG, "internet connection is available");
+                    urlc.disconnect();
                     return ConnectionAvailability.INTERNET_AVAILABLE;
-                } else
+                } else {
+                    Log.i(LOG_TAG, "internet connection is not available");
+                    urlc.disconnect();
                     return ConnectionAvailability.INTERNET_NOT_AVAILABLE;
+                }
+
+            } catch (MalformedURLException e) {
+                Log.i(LOG_TAG, e.toString());
+                e.printStackTrace();
+                return ConnectionAvailability.INTERNET_AVAILABLE;
             } catch (IOException e) {
-                return ConnectionAvailability.INTERNET_NOT_AVAILABLE;
+                Log.i(LOG_TAG, e.toString());
+                e.printStackTrace();
+                return ConnectionAvailability.INTERNET_AVAILABLE;
             }
         } else {
             return ConnectionAvailability.NETWORK_NOT_AVAILABLE;

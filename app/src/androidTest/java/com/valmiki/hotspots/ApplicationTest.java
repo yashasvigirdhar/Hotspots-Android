@@ -1,4 +1,4 @@
-package app.nomad.projects.yashasvi.hotspots;
+package com.valmiki.hotspots;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

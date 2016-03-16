@@ -218,7 +218,7 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
                 return;
             }
             if (responseFromServer.equals(String.valueOf(HttpURLConnection.HTTP_OK))) {
-                Toast.makeText(mContext, "Thanks! Your feedback has been submitted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, R.string.submit_feedback_success, Toast.LENGTH_SHORT).show();
                 finish();
             }
 

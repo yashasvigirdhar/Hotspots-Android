@@ -83,7 +83,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     private LocationHelper locationHelper = null;
 
-    private List<Place> places;
+    List<Place> places;
     private List<Float> distances;
 
     private ProgressDialog pd;

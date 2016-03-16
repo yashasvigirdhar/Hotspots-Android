@@ -58,7 +58,7 @@ public class ServerHelperFunctions {
             int status = connection.getResponseCode();
             Log.i(LOG_TAG, String.format("status for %s : %s", url, status));
             if (status == HttpURLConnection.HTTP_NO_CONTENT) {
-                return "not present";
+                return String.valueOf(HttpURLConnection.HTTP_NO_CONTENT);
             }
 
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -68,6 +68,8 @@ public class ServerHelperFunctions {
                 sb.append(line).append("\n");
             }
             br.close();
+            if (connection != null)
+                connection.disconnect();
             return sb.toString();
 
         } catch (Exception ex) {
@@ -123,6 +125,8 @@ public class ServerHelperFunctions {
                 response.append('\r');
             }
             Log.e(LOG_TAG, response.toString());
+            if (connection != null)
+                connection.disconnect();
             return response.toString();
 
         } catch (Exception ex) {

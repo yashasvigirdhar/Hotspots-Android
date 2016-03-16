@@ -33,7 +33,7 @@ public class PlaceImagesActivity extends AppCompatActivity {
 
     private RecyclerView placeImagesRecyclerView;
     private PlaceImagesRecyclerViewAdapter placeImagesRecyclerViewAdapter;
-    private List<Bitmap> placeImageBitmaps;
+    List<Bitmap> placeImageBitmaps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
