@@ -9,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.adapters.PlaceImagesRecyclerViewAdapter;
@@ -23,7 +25,9 @@ import java.util.List;
 
 public class PlaceImagesActivity extends AppCompatActivity {
 
-    private static final String TAG = "PlaceImageActivity";
+    Tracker analyticsTracker;
+
+    private static final String LOG_TAG = "PlaceImageActivity";
 
     private String placeId;
     private String placeName;
@@ -38,7 +42,7 @@ public class PlaceImagesActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "onCreate");
+        Log.i(LOG_TAG, "onCreate");
         setContentView(R.layout.activity_place_images);
         initialize();
         new downloadImageAsyncTask().execute();
@@ -67,6 +71,15 @@ public class PlaceImagesActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        placeImagesRecyclerViewAdapter.setAnalyticsTracker(analyticsTracker);
+    }
+
     private class downloadImageAsyncTask extends AsyncTask<Void, Object, Void> {
 
         @Override
@@ -79,11 +92,11 @@ public class PlaceImagesActivity extends AppCompatActivity {
             for (int i = 0; i < imagesCount; i++) {
                 path = ServerConstants.SERVER_URL + imagesPath + ServerConstants.PLACE_PATH + ServerConstants.THUMBNAILS_PATH + placeName + i + ".png";
                 path = path.replace(" ", "%20");
-                Log.i(TAG, path);
+                Log.i(LOG_TAG, path);
                 Bitmap bt = ((MyApplication) getApplication()).getBitmapFromCache(UtilFunctions.getImageCacheKey(placeId, ImageType.PLACE, i, ImageSize.THUMBNAIL));
                 if (bt == null) {
-                    Log.i(TAG, "bitmap not present in cache " + i);
-                    bt = ServerHelperFunctions.downloadBitmapFromUrl(path);
+                    Log.i(LOG_TAG, "bitmap not present in cache " + i);
+                    bt = ServerHelperFunctions.downloadBitmapFromUrl(path, analyticsTracker);
                 }
                 publishProgress(bt, ImageType.PLACE, i);
             }

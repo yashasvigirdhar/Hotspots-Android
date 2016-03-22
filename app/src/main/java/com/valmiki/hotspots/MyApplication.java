@@ -4,6 +4,9 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
+
 import com.valmiki.hotspots.utils.Constants;
 import com.valmiki.hotspots.utils.ImageMemoryCache;
 
@@ -16,6 +19,8 @@ public class MyApplication extends Application {
 
     private ImageMemoryCache mMemoryCache;
     private int cacheSize;
+
+    private Tracker mTracker;
 
     @Override
     public void onCreate() {
@@ -65,6 +70,23 @@ public class MyApplication extends Application {
 
     public Bitmap getBitmapFromCache(String key) {
         return mMemoryCache.get(key);
+    }
+
+    /**
+     * Gets the default {@link Tracker} for this {@link Application}.
+     *
+     * @return tracker
+     */
+    synchronized public Tracker getDefaultTracker() {
+        if (mTracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
+            mTracker = analytics.newTracker(R.xml.global_tracker);
+            mTracker.enableAutoActivityTracking(true);
+            mTracker.setAppName(getResources().getString(R.string.app_name));
+            mTracker.setAppVersion("1.0");
+        }
+        return mTracker;
     }
 
 }

@@ -55,10 +55,7 @@ public class PlacesListActivityTest {
         for (int i = 0; i < numPlaces; i++) {
             onView(withId(R.id.my_recycler_view)).perform(RecyclerViewActions.scrollToPosition(i));
             onView(withId(R.id.my_recycler_view)).perform(RecyclerViewActions.actionOnItemAtPosition(i, click()));
-            onView(withId(R.id.ivPlaceCover)).perform(click());
             pressBack();
-            pressBack();
-
         }
     }
 

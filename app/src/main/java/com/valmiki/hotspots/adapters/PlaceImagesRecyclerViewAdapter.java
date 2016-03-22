@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.activities.FullscreenPlaceImagesActivity;
 
@@ -28,6 +30,7 @@ public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceIm
     private final String imagesPath;
     private int imagesCount;
 
+    Tracker analyticsTracker;
 
     public PlaceImagesRecyclerViewAdapter(Activity activity, List<Bitmap> bitmaps, String place_id, String place_name, String imagesPath, int imagesCount) {
         this.mActivity = activity;
@@ -36,6 +39,10 @@ public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceIm
         this.place_name = place_name;
         this.imagesCount = imagesCount;
         this.imagesPath = imagesPath;
+    }
+
+    public void setAnalyticsTracker(Tracker analyticsTracker) {
+        this.analyticsTracker = analyticsTracker;
     }
 
     public void updateImagesCount(int imagesCount) {
@@ -66,6 +73,11 @@ public class PlaceImagesRecyclerViewAdapter extends RecyclerView.Adapter<PlaceIm
         Intent i;
         switch (v.getId()) {
             case R.id.ivPlaceImage:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(mActivity.getString(R.string.anaylitics_click_image))
+                        .setLabel("Image Clicked")
+                        .build());
                 i = new Intent(mActivity, FullscreenPlaceImagesActivity.class);
                 Log.i(LOG_TAG, "starting full screen activity " + place_id + " " + imagesCount + " " + position);
                 i.putExtra("place_id", place_id);

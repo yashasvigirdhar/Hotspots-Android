@@ -21,7 +21,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.gson.Gson;
+import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.enums.FeedbackType;
 import com.valmiki.hotspots.models.PlaceFeedback;
@@ -32,7 +35,9 @@ import java.net.HttpURLConnection;
 
 public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String TAG = "PlaceFeedbackActivity";
+    Tracker analyticsTracker;
+
+    private static final String LOG_TAG = "PlaceFeedbackActivity";
 
     private final Context mContext = this;
 
@@ -68,6 +73,14 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_feedback);
         initialize();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     private void initialize() {
@@ -171,6 +184,11 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
                 feeling = 3;
                 break;
             case R.id.bSendPlaceFeedback:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("PlaceFeedback")
+                        .setAction("SubmitClick")
+                        .setLabel("BeforeValidation, place : " + place_id)
+                        .build());
                 if (!validateName()) {
                     return;
                 }
@@ -181,6 +199,11 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
                     Toast.makeText(PlaceFeedbackActivity.this, "Please tell us how are you feeling", Toast.LENGTH_LONG).show();
                     return;
                 }
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("PlaceFeedback")
+                        .setAction("SubmitClick")
+                        .setLabel("AfterValidation, place : " + place_id)
+                        .build());
                 sendPlaceFeedbackToServer();
                 break;
         }
@@ -196,14 +219,14 @@ public class PlaceFeedbackActivity extends AppCompatActivity implements View.OnC
 
         @Override
         protected String doInBackground(Void... params) {
-            return ServerHelperFunctions.postJSON(jsonData, FeedbackType.PLACE);
+            return ServerHelperFunctions.postJSON(jsonData, FeedbackType.PLACE, analyticsTracker);
         }
 
         @Override
         protected void onPostExecute(String responseFromServer) {
             super.onPostExecute(responseFromServer);
-            Log.i(TAG, "onPostExecute");
-            Log.i(TAG, "responsefromserver : " + responseFromServer);
+            Log.i(LOG_TAG, "onPostExecute");
+            Log.i(LOG_TAG, "responsefromserver : " + responseFromServer);
             if (responseFromServer.contains("Exception")) {
                 internetSnackbar = Snackbar
                         .make(coordinatorLayout, "Please check your Internet Connection and try again.", Snackbar.LENGTH_INDEFINITE)

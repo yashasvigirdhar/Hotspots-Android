@@ -21,8 +21,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.gson.Gson;
-
+import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.enums.FeedbackType;
 import com.valmiki.hotspots.models.AppFeedback;
@@ -34,7 +36,9 @@ import java.net.HttpURLConnection;
 
 public class AppFeedbackActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String TAG = "AppFeedbackActivity";
+    Tracker analyticsTracker;
+
+    private static final String LOG_TAG = "AppFeedbackActivity";
 
     private final Context mContext = this;
 
@@ -64,6 +68,14 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
 
         initialize();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     private void initialize() {
@@ -177,6 +189,11 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
                 feeling = 3;
                 break;
             case R.id.bSendAppFeedback:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("AppFeedback")
+                        .setAction("SubmitClick")
+                        .setLabel("BeforeValidation")
+                        .build());
                 if (feeling == -1) {
                     Toast.makeText(AppFeedbackActivity.this, "Please tell us how are you feeling", Toast.LENGTH_LONG).show();
                     return;
@@ -192,6 +209,11 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
                 if (!validateMessage()) {
                     return;
                 }
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("AppFeedback")
+                        .setAction("SubmitClick")
+                        .setLabel("AfterValidation")
+                        .build());
                 sendAppFeedbackToServer();
                 break;
         }
@@ -206,14 +228,14 @@ public class AppFeedbackActivity extends AppCompatActivity implements View.OnCli
 
         @Override
         protected String doInBackground(Void... params) {
-            return ServerHelperFunctions.postJSON(jsonData, FeedbackType.APP);
+            return ServerHelperFunctions.postJSON(jsonData, FeedbackType.APP, analyticsTracker);
         }
 
         @Override
         protected void onPostExecute(String responseFromServer) {
             super.onPostExecute(responseFromServer);
-            Log.i(TAG, "onPostExecute");
-            Log.i(TAG, "responsefromserver : " + responseFromServer);
+            Log.i(LOG_TAG, "onPostExecute");
+            Log.i(LOG_TAG, "responsefromserver : " + responseFromServer);
             if (responseFromServer.contains("Exception")) {
                 internetSnackbar = Snackbar
                         .make(coordinatorLayout, "Please check your Internet Connection and try again.", Snackbar.LENGTH_INDEFINITE)

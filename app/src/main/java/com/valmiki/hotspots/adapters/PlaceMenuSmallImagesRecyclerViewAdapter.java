@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.activities.FullscreenPlaceImagesActivity;
 
@@ -29,12 +31,17 @@ public class PlaceMenuSmallImagesRecyclerViewAdapter extends RecyclerView.Adapte
 
     private int imagesCount = 0;
 
+    Tracker analyticsTracker;
 
     public PlaceMenuSmallImagesRecyclerViewAdapter(Activity activity, List<Bitmap> bitmaps, String place_id, String place_name) {
         this.mActivity = activity;
         this.imageBitmaps = bitmaps;
         this.place_id = place_id;
         this.place_name = place_name;
+    }
+
+    public void setAnalyticsTracker(Tracker analyticsTracker) {
+        this.analyticsTracker = analyticsTracker;
     }
 
     public void updateImagesCount(int imagesCount) {
@@ -68,6 +75,11 @@ public class PlaceMenuSmallImagesRecyclerViewAdapter extends RecyclerView.Adapte
         Intent i;
         switch (v.getId()) {
             case R.id.ivPlaceMenuSmallImage:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(mActivity.getString(R.string.anaylitics_click_image))
+                        .setLabel("Small Menu Image Clicked")
+                        .build());
                 i = new Intent(mActivity, FullscreenPlaceImagesActivity.class);
                 i.putExtra("place_id", place_id);
                 i.putExtra("place_name", place_name);

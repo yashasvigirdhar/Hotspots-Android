@@ -13,8 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.valmiki.hotspots.R;
-import com.valmiki.hotspots.activities.PlaceViewActivity;
 import com.valmiki.hotspots.models.Place;
 
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
     private List<Place> all_Places;
     private List<Float> distances;
 
+    Tracker analyticsTracker;
+
     private static OnPlaceClickedListener onPlaceClickedListener;
 
     public PlacesRecyclerViewAdapter(List<Place> myDataset, List<Float> distances, Context mContext) {
@@ -41,6 +44,10 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         this.all_Places = myDataset;
         this.distances = distances;
         this.mContext = mContext;
+    }
+
+    public void setAnalyticsTracker(Tracker analyticsTracker) {
+        this.analyticsTracker = analyticsTracker;
     }
 
     public void setOnPlaceClickedListener(OnPlaceClickedListener onPlaceClickedListener) {
@@ -114,12 +121,12 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
         int position = (Integer) v.getTag();
         Intent i;
         switch (v.getId()) {
-            case R.id.tvPlaceName:
-                i = new Intent(mContext, PlaceViewActivity.class);
-                i.putExtra("place", mDataset.get(position));
-                mContext.startActivity(i);
-                break;
             case R.id.llPlaceCardCall:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(mContext.getString(R.string.anaylitics_click_button))
+                        .setLabel("Call Button")
+                        .build());
                 i = new Intent(Intent.ACTION_DIAL);
                 i.setData(Uri.parse("tel:" + mDataset.get(position).getPhone()));
                 try {
@@ -131,7 +138,12 @@ public class PlacesRecyclerViewAdapter extends RecyclerView.Adapter<PlacesRecycl
                 break;
 
             case R.id.llPlaceCardNavigate:
-                String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?daddr=%f,%f", Double.parseDouble(mDataset.get(position).getLatitude()), Double.parseDouble(mDataset.get(position).getLongitude()));
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(mContext.getString(R.string.anaylitics_click_button))
+                        .setLabel("Navigate Button")
+                        .build());
+                String uri = String.format(Locale.ENGLISH, mContext.getString(R.string.maps_navigate_string), Double.parseDouble(mDataset.get(position).getLatitude()), Double.parseDouble(mDataset.get(position).getLongitude()));
                 //Uri gmmIntentUri = Uri.parse("google.navigation:q=12.939074,77.612976");
                 i = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 i.setPackage("com.google.android.apps.maps");

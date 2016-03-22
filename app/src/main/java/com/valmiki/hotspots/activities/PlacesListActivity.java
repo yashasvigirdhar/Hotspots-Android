@@ -39,9 +39,12 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.adapters.PlacesRecyclerViewAdapter;
 import com.valmiki.hotspots.enums.ConnectionAvailability;
@@ -63,6 +66,9 @@ import java.util.concurrent.TimeUnit;
 
 
 public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener, View.OnClickListener, FragmentDrawer.FragmentDrawerListener, SwipeRefreshLayout.OnRefreshListener {
+
+    Tracker analyticsTracker;
+
 
     private final static String LOG_TAG = "PlacesListActivity";
     private String city = "";
@@ -280,6 +286,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     public void onPlaceClicked(int position, View v) {
+        analyticsTracker.send(new HitBuilders.EventBuilder()
+                .setCategory(LOG_TAG)
+                .setAction(getString(R.string.place_clicked))
+                .setLabel(places.get(position).getName())
+                .build());
         Intent i = new Intent(this, PlaceViewActivity.class);
         i.putExtra("place", places.get(position));
         startActivity(i);
@@ -289,6 +300,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ll_toolbarPlacesList:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("PlacesList")
+                        .setAction("ClickToolbar")
+                        .setLabel("City Change")
+                        .build());
                 Intent i = new Intent(this, CitySelectionActivity.class);
                 i.putExtra("from", "places");
                 startActivity(i);
@@ -360,6 +376,16 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.set("cityName", city);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        mAdapter.setAnalyticsTracker(analyticsTracker);
+    }
+
+    @Override
     protected void onPause() {
         killToast();
         super.onPause();
@@ -376,14 +402,29 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         Intent i;
         switch (position) {
             case 0:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_draweritem_clicked))
+                        .setLabel(getString(R.string.title_about))
+                        .build());
                 i = new Intent(this, AboutMeActivity.class);
                 startActivity(i);
                 break;
             case 1:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_draweritem_clicked))
+                        .setLabel(getString(R.string.title_app_feedback))
+                        .build());
                 i = new Intent(this, AppFeedbackActivity.class);
                 startActivity(i);
                 break;
             case 2:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_draweritem_clicked))
+                        .setLabel(getString(R.string.title_suggest_place))
+                        .build());
                 i = new Intent(this, SuggestNewPlaceActivity.class);
                 startActivity(i);
                 break;
@@ -412,7 +453,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         @Override
         protected String doInBackground(Void... params) {
             String resultString;
-            resultString = ServerHelperFunctions.getJSON(mUrl);
+            resultString = ServerHelperFunctions.getJSON(mUrl, analyticsTracker);
             return resultString;
         }
 
@@ -454,6 +495,10 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                     Log.i(LOG_TAG, places.get(i).toString());
             } catch (JsonSyntaxException e) {
                 //not able to parse response, after requesting all places
+                analyticsTracker.send(new HitBuilders.ExceptionBuilder()
+                        .setDescription(e.toString())
+                        .setFatal(true)
+                        .build());
             }
 
         }
@@ -476,6 +521,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                                 .setAction("ALLOW", new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
+                                        analyticsTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(LOG_TAG)
+                                                .setAction(getString(R.string.analytics_snackbar_action))
+                                                .setLabel("gps_permission_settings")
+                                                .build());
                                         ActivityCompat.requestPermissions(PlacesListActivity.this,
                                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                                 Constants.REQUEST_CODE_GPS_PERMISSIONS);
@@ -490,6 +540,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                             .setAction("SETTINGS", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
+                                    analyticsTracker.send(new HitBuilders.EventBuilder()
+                                            .setCategory(LOG_TAG)
+                                            .setAction(getString(R.string.analytics_snackbar_action))
+                                            .setLabel("app_settings")
+                                            .build());
                                     Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                     intent.setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
                                     startActivityForResult(intent, Constants.REQUEST_CODE_INTENT_APP_SETTINGS);
@@ -579,16 +634,25 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_menuitem_clicked))
+                        .setLabel(getString(R.string.analytics_menu_sort))
+                        .build());
                 sortDialog.show();
                 return true;
             case R.id.menu_refresh:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_menuitem_clicked))
+                        .setLabel(getString(R.string.analytics_menu_refresh))
+                        .build());
                 Log.i(LOG_TAG, "Refresh menu item selected");
 
                 // Signal SwipeRefreshLayout to start the progress indicator
                 swipeRefreshLayout.setRefreshing(true);
 
-                // Start the refresh background task.
-                // This method calls setRefreshing(false) when it's finished.
+
                 refreshPlaces();
 
                 return true;

@@ -16,6 +16,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.enums.ConnectionAvailability;
 import com.valmiki.hotspots.utils.CheckInternetAsyncTask;
@@ -25,6 +28,8 @@ import com.valmiki.hotspots.utils.ServerConstants;
 import java.util.concurrent.TimeUnit;
 
 public class SuggestNewPlaceActivity extends AppCompatActivity {
+
+    Tracker analyticsTracker;
 
     private static final String LOG_TAG = "SuggestNewPlaceActivity";
 
@@ -46,6 +51,14 @@ public class SuggestNewPlaceActivity extends AppCompatActivity {
         initialize();
         pd = ProgressDialog.show(this, "Please wait..", "", true, true);
         webView.loadUrl(ServerConstants.SUGGEST_PLACE_URL);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     private void initialize() {

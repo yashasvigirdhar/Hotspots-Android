@@ -27,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.gson.Gson;
 import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
@@ -51,6 +53,8 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class PlaceViewActivity extends AppCompatActivity implements View.OnClickListener {
+
+    Tracker analyticsTracker;
 
     private static final String LOG_TAG = "PlaceViewActivity";
 
@@ -142,6 +146,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                     .setAction("SETTINGS", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            analyticsTracker.send(new HitBuilders.EventBuilder()
+                                    .setCategory(LOG_TAG)
+                                    .setAction(getString(R.string.analytics_snackbar_action))
+                                    .setLabel("network_settings")
+                                    .build());
                             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS);
                         }
                     })
@@ -272,8 +281,14 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onClick(View v) {
         Intent i;
+
         switch (v.getId()) {
             case R.id.ivPlaceCover:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.anaylitics_click_button))
+                        .setLabel("CoverImage")
+                        .build());
                 i = new Intent(this, PlaceImagesActivity.class);
                 i.putExtra("place_id", place.getId().toString());
                 i.putExtra("place_name", place.getName());
@@ -282,6 +297,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 startActivity(i);
                 break;
             case R.id.tvMoreImages:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.anaylitics_click_button))
+                        .setLabel("More Images Button")
+                        .build());
                 i = new Intent(this, PlaceImagesActivity.class);
                 i.putExtra("place_id", place.getId().toString());
                 i.putExtra("place_name", place.getName());
@@ -290,6 +310,11 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 startActivity(i);
                 break;
             case R.id.ibCallPlace:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.anaylitics_click_button))
+                        .setLabel("Call Button")
+                        .build());
                 i = new Intent(Intent.ACTION_DIAL);
                 i.setData(Uri.parse("tel:" + tvPhone.getText().toString()));
                 try {
@@ -300,7 +325,12 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 }
                 break;
             case R.id.ibNavigateToPlace:
-                String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?daddr=%f,%f", Double.parseDouble(place.getLatitude()), Double.parseDouble(place.getLongitude()));
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.anaylitics_click_button))
+                        .setLabel("Navigate Button")
+                        .build());
+                String uri = String.format(Locale.ENGLISH, getString(R.string.maps_navigate_string), Double.parseDouble(place.getLatitude()), Double.parseDouble(place.getLongitude()));
                 i = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 i.setPackage("com.google.android.apps.maps");
                 if (i.resolveActivity(getPackageManager()) != null) {
@@ -315,12 +345,22 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 }
                 break;
             case R.id.bGoToPlaceFeedbackScreen:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.anaylitics_click_button))
+                        .setLabel("Submit Feedback Button")
+                        .build());
                 i = new Intent(this, PlaceFeedbackActivity.class);
                 i.putExtra("placeId", place.getId());
                 i.putExtra("placeName", place.getName());
                 startActivity(i);
                 break;
             case R.id.ibTimingExpand:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.anaylitics_click_button))
+                        .setLabel("More Images Button")
+                        .build());
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage(UtilFunctions.getTimingsDialogString(timings))
                         .setTitle("Timings");
@@ -360,11 +400,38 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_menuitem_clicked))
+                        .setLabel("Share")
+                        .build());
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onPause() {
         Log.i(LOG_TAG, "activity paused");
         getTimingsAsyncTask.cancel(true);
         downloadImageAsyncTask.cancel(true);
         super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.set("placeName", place.getName());
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        placeSmallImagesAdapter.setAnalyticsTracker(analyticsTracker);
+        placeMenuSmallImagesAdapter.setAnalyticsTracker(analyticsTracker);
     }
 
     // Call to update the share intent
@@ -383,7 +450,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
             if (imagesCount == 0 && menuImagesCount == 0)
                 return null;
             String coverImageUrl = ServerHelperFunctions.getPlaceCoverImageUrl(imagesPath, place.getName());
-            Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(coverImageUrl);
+            Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(coverImageUrl, analyticsTracker);
             if (bt != null)
                 publishProgress(bt, ImageType.COVER);
 
@@ -401,7 +468,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
 
                 path = ServerConstants.SERVER_URL + imagesPath + ServerConstants.PLACE_PATH + ServerConstants.THUMBNAILS_PATH + place.getName() + i + ".png";
                 path = path.replace(" ", "%20");
-                bt = ServerHelperFunctions.downloadBitmapFromUrl(path);
+                bt = ServerHelperFunctions.downloadBitmapFromUrl(path, analyticsTracker);
 
                 if (bt != null) {
                     publishProgress(bt, ImageType.PLACE);
@@ -421,7 +488,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                 path = ServerConstants.SERVER_URL + imagesPath + ServerConstants.MENU_PATH + ServerConstants.THUMBNAILS_PATH + place.getName() + i + ".png";
                 path = path.replace(" ", "%20");
                 Log.i(LOG_TAG, path);
-                bt = ServerHelperFunctions.downloadBitmapFromUrl(path);
+                bt = ServerHelperFunctions.downloadBitmapFromUrl(path, analyticsTracker);
 
                 if (bt != null) {
                     publishProgress(bt, ImageType.MENU);
@@ -469,7 +536,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
             String resultString;
             if (isCancelled())
                 return null;
-            resultString = ServerHelperFunctions.getJSON(mUrl);
+            resultString = ServerHelperFunctions.getJSON(mUrl, analyticsTracker);
             return resultString;
         }
 
@@ -488,6 +555,10 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
                     tvTiming.setText(day + " : " + timings.getTuesday());
                 }
             } catch (Exception e) {
+                analyticsTracker.send(new HitBuilders.ExceptionBuilder()
+                        .setDescription(e.toString())
+                        .setFatal(true)
+                        .build());
                 Log.i(LOG_TAG, e.toString());
             }
 

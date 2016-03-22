@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.valmiki.hotspots.enums.FeedbackType;
 
 import java.io.BufferedReader;
@@ -35,7 +37,7 @@ public class ServerHelperFunctions {
         return url;
     }
 
-    public static Bitmap downloadBitmapFromUrl(String url) {
+    public static Bitmap downloadBitmapFromUrl(String url, Tracker analyticsTracker) {
         Bitmap imageBitmap = null;
         try {
             URL u = new URL(url);
@@ -44,12 +46,16 @@ public class ServerHelperFunctions {
             Log.i("image activity", "Download Completed Successfully");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, e.toString());
+            analyticsTracker.send(new HitBuilders.ExceptionBuilder()
+                    .setDescription(e.toString())
+                    .setFatal(true)
+                    .build());
         }
         return imageBitmap;
     }
 
-    public static String getJSON(String url) {
+    public static String getJSON(String url, Tracker analyticsTracker) {
         HttpURLConnection connection = null;
         try {
             URL u = new URL(url);
@@ -72,8 +78,13 @@ public class ServerHelperFunctions {
                 connection.disconnect();
             return sb.toString();
 
-        } catch (Exception ex) {
-            return ex.toString();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
+            analyticsTracker.send(new HitBuilders.ExceptionBuilder()
+                    .setDescription(e.toString())
+                    .setFatal(true)
+                    .build());
+            return e.toString();
         } finally {
             if (connection != null) {
                 try {
@@ -85,7 +96,7 @@ public class ServerHelperFunctions {
         }
     }
 
-    public static String postJSON(String jsonData, FeedbackType feedbackType) {
+    public static String postJSON(String jsonData, FeedbackType feedbackType, Tracker analyticsTracker) {
         int status = 0;
         HttpURLConnection connection = null;
         try {
@@ -129,9 +140,13 @@ public class ServerHelperFunctions {
                 connection.disconnect();
             return response.toString();
 
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, ex.toString());
-            return ex.toString();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
+            analyticsTracker.send(new HitBuilders.ExceptionBuilder()
+                    .setDescription(e.toString())
+                    .setFatal(true)
+                    .build());
+            return e.toString();
         } finally {
             if (connection != null) {
                 try {

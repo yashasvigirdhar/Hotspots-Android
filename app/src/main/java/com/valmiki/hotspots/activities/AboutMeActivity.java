@@ -7,11 +7,15 @@ import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+import com.valmiki.hotspots.MyApplication;
+import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.utils.Constants;
 
-import com.valmiki.hotspots.R;
-
 public class AboutMeActivity extends AppCompatActivity {
+
+    Tracker analyticsTracker;
 
     private static String LOG_TAG = "AboutMeAcivity";
 
@@ -49,6 +53,9 @@ public class AboutMeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

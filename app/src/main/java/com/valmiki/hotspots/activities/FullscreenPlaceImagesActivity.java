@@ -21,6 +21,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.adapters.FullScreenImageAdapter;
@@ -40,6 +42,8 @@ import java.util.List;
 
 
 public class FullscreenPlaceImagesActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+
+    Tracker analyticsTracker;
 
     private final static String LOG_TAG = "FullScreenImageActivity";
 
@@ -123,6 +127,9 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
     protected void onResume() {
         super.onResume();
         Log.i(LOG_TAG, "onResume");
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     private void populateBitmaps() {
@@ -253,6 +260,13 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
 
     @Override
     public void onPageSelected(int pos) {
+        if (analyticsTracker != null) {
+            analyticsTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory(LOG_TAG)
+                    .setAction(getString(R.string.analytics_fullscreen_pageselected))
+                    .setLabel("Full Screen Image selected")
+                    .build());
+        }
         Log.i(LOG_TAG, "page selected " + pos);
         position = pos;
         Bitmap bt;
@@ -291,7 +305,7 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
 
         @Override
         protected Void doInBackground(Void... params) {
-            Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(url);
+            Bitmap bt = ServerHelperFunctions.downloadBitmapFromUrl(url, analyticsTracker);
             if (bt != null)
                 publishProgress(bt);
             return null;
@@ -327,6 +341,11 @@ public class FullscreenPlaceImagesActivity extends AppCompatActivity implements 
                                 .setAction("ALLOW", new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
+                                        analyticsTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory(LOG_TAG)
+                                                .setAction(getString(R.string.analytics_snackbar_action))
+                                                .setLabel("External storage permission")
+                                                .build());
                                         ActivityCompat.requestPermissions(FullscreenPlaceImagesActivity.this,
                                                 PERMISSIONS_STORAGE, Constants.REQUEST_CODE_EXTERNAL_STORAGE_PERMISSION);
                                     }

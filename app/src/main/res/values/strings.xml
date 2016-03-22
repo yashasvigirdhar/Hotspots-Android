@@ -84,4 +84,17 @@
     <string name="about_description">Hotspots aims to provide you an extremely easy way to discover places in a city where you can take your laptop, when you are tired of applying wifi filter on other places.</string>
     <string name="submit_feedback_success">Thanks! Your feedback has been submitted</string>
     <string name="internet_validation_url">http://clients3.google.com/generate_204</string>
+    <string name="maps_navigate_string" formatted="false">http://maps.google.com/maps?daddr=%f,%f</string>
+
+    <string name="anaylitics_click_button">ClickButton</string>
+    <string name="analytics_menuitem_clicked">ClickMenuItem</string>
+    <string name="analytics_onactivityresult">OnActivityResult</string>
+    <string name="analytics_snackbar_action">Snackbar Action Clicked</string>
+    <string name="place_clicked">Place Clicked</string>
+    <string name="city_clicked">City Clicked</string>
+    <string name="analytics_menu_sort">Sort</string>
+    <string name="analytics_menu_refresh">Refresh</string>
+    <string name="analytics_draweritem_clicked">Drawer Item Clicked</string>
+    <string name="anaylitics_click_image">Image Click</string>
+    <string name="analytics_fullscreen_pageselected">Full Screen Page Selected</string>
 </resources>

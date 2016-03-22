@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.activities.PlaceImagesActivity;
 
@@ -30,12 +32,17 @@ public class PlaceSmallImagesRecyclerViewAdapter extends RecyclerView.Adapter<Pl
 
     private int imagesCount = 0;
 
+    Tracker analyticsTracker;
 
     public PlaceSmallImagesRecyclerViewAdapter(Activity activity, List<Bitmap> bitmaps, String place_id, String place_name) {
         this.mActivity = activity;
         this.imageBitmaps = bitmaps;
         this.place_id = place_id;
         this.place_name = place_name;
+    }
+
+    public void setAnalyticsTracker(Tracker analyticsTracker) {
+        this.analyticsTracker = analyticsTracker;
     }
 
     public void updateImagesCount(int imagesCount) {
@@ -69,6 +76,11 @@ public class PlaceSmallImagesRecyclerViewAdapter extends RecyclerView.Adapter<Pl
         Intent i;
         switch (v.getId()) {
             case R.id.ivPlaceSmallImage:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(mActivity.getString(R.string.anaylitics_click_image))
+                        .setLabel("Small Image Clicked")
+                        .build());
                 i = new Intent(mActivity, PlaceImagesActivity.class);
                 i.putExtra("place_id", place_id);
                 i.putExtra("place_name", place_name);

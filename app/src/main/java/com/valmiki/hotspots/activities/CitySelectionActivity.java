@@ -18,9 +18,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.valmiki.hotspots.MyApplication;
 import com.valmiki.hotspots.R;
 import com.valmiki.hotspots.adapters.CitiesRecyclerViewAdapter;
 import com.valmiki.hotspots.enums.AppStart;
@@ -53,6 +56,8 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
     private ProgressDialog pd;
 
     Snackbar internetSnackbar;
+
+    Tracker analyticsTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +101,9 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
     @Override
     protected void onResume() {
         Log.i(LOG_TAG, "onResume");
+        analyticsTracker = ((MyApplication) getApplication()).getDefaultTracker();
+        analyticsTracker.setScreenName(LOG_TAG);
+        analyticsTracker.send(new HitBuilders.ScreenViewBuilder().build());
         super.onResume();
         if (places == null) {
             initialize();
@@ -136,6 +144,11 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
                     .setAction("SETTINGS", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            analyticsTracker.send(new HitBuilders.EventBuilder()
+                                    .setCategory(LOG_TAG)
+                                    .setAction(getString(R.string.analytics_snackbar_action))
+                                    .setLabel("network_settings")
+                                    .build());
                             startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS);
                         }
                     })
@@ -170,6 +183,12 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
     @Override
     public void onItemClick(int position, View v) {
         String city = places.get(position).getName();
+        analyticsTracker.send(new HitBuilders.EventBuilder()
+                .setCategory(LOG_TAG)
+                .setAction(getString(R.string.city_clicked))
+                .setLabel(city)
+                .build());
+
         SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(this);
         sharedPreferences.edit()
@@ -208,6 +227,11 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
         switch (item.getItemId()) {
 
             case R.id.menu_refresh:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_menuitem_clicked))
+                        .setLabel(getString(R.string.analytics_menu_refresh))
+                        .build());
                 Log.i(LOG_TAG, "Refresh menu item selected");
 
                 // Signal SwipeRefreshLayout to start the progress indicator
@@ -243,7 +267,7 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
 
         @Override
         protected String doInBackground(Void... params) {
-            return ServerHelperFunctions.getJSON(mUrl);
+            return ServerHelperFunctions.getJSON(mUrl, analyticsTracker);
         }
 
         @Override
