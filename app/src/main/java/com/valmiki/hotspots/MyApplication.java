@@ -4,9 +4,9 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.google.android.gms.analytics.ExceptionReporter;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
-
 import com.valmiki.hotspots.utils.Constants;
 import com.valmiki.hotspots.utils.ImageMemoryCache;
 
@@ -36,6 +36,24 @@ public class MyApplication extends Application {
         mMemoryCache = new ImageMemoryCache(cacheSize);
 
         populateConstants();
+
+        if (mTracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
+            mTracker = analytics.newTracker(R.xml.global_tracker);
+            mTracker.enableAutoActivityTracking(true);
+            mTracker.enableExceptionReporting(true);
+            mTracker.setAppName(getResources().getString(R.string.app_name));
+            mTracker.setAppVersion("1.0");
+
+            Thread.UncaughtExceptionHandler myHandler = new ExceptionReporter(
+                    mTracker,
+                    Thread.getDefaultUncaughtExceptionHandler(),
+                    this);
+
+            // Make myHandler the new default uncaught exception handler.
+            Thread.setDefaultUncaughtExceptionHandler(myHandler);
+        }
     }
 
     private void populateConstants() {
@@ -83,8 +101,17 @@ public class MyApplication extends Application {
             // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
             mTracker = analytics.newTracker(R.xml.global_tracker);
             mTracker.enableAutoActivityTracking(true);
+            mTracker.enableExceptionReporting(true);
             mTracker.setAppName(getResources().getString(R.string.app_name));
             mTracker.setAppVersion("1.0");
+
+            Thread.UncaughtExceptionHandler myHandler = new ExceptionReporter(
+                    mTracker,
+                    Thread.getDefaultUncaughtExceptionHandler(),
+                    this);
+
+            // Make myHandler the new default uncaught exception handler.
+            Thread.setDefaultUncaughtExceptionHandler(myHandler);
         }
         return mTracker;
     }

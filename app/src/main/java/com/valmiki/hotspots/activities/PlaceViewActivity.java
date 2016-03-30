@@ -544,7 +544,7 @@ public class PlaceViewActivity extends AppCompatActivity implements View.OnClick
         protected void onPostExecute(String jsonString) {
             super.onPostExecute(jsonString);
             Log.i(LOG_TAG, "on post execute\n" + jsonString);
-            if (jsonString == String.valueOf(HttpURLConnection.HTTP_NO_CONTENT)) {
+            if (jsonString.equals(String.valueOf(HttpURLConnection.HTTP_NO_CONTENT))) {
                 tvTiming.setText("Timings not available");
             }
             try {
