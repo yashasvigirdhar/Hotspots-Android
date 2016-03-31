@@ -41,6 +41,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -65,10 +69,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
-public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener, View.OnClickListener, FragmentDrawer.FragmentDrawerListener, SwipeRefreshLayout.OnRefreshListener {
+public class PlacesListActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, LocationListener, LocationHelper.GpsListener, PlacesRecyclerViewAdapter.OnPlaceClickedListener, View.OnClickListener, FragmentDrawer.FragmentDrawerListener, SwipeRefreshLayout.OnRefreshListener, GoogleApiClient.OnConnectionFailedListener {
 
     Tracker analyticsTracker;
 
+    private GoogleApiClient mGoogleApiClient;
 
     private final static String LOG_TAG = "PlacesListActivity";
     private String city = "";
@@ -112,6 +117,27 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
         Intent callingIntent = getIntent();
         if (callingIntent != null && callingIntent.getStringExtra("city") != null)
             city = callingIntent.getStringExtra("city");
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(AppInvite.API)
+                .enableAutoManage(this, this)
+                .build();
+
+        // Check for App Invite invitations and launch deep-link activity if possible.
+        // Requires that an Activity is registered in AndroidManifest.xml to handle
+        // deep-link URLs.
+//        boolean autoLaunchDeepLink = false;
+//        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, autoLaunchDeepLink)
+//                .setResultCallback(
+//                        new ResultCallback<AppInviteInvitationResult>() {
+//                            @Override
+//                            public void onResult(AppInviteInvitationResult result) {
+//                                Log.d(LOG_TAG, "getInvitation:onResult:" + result.getStatus());
+//                                // Because autoLaunchDeepLink = true we don't have to do anything
+//                                // here, but we could set that to false and manually choose
+//                                // an Activity to launch to handle the deep link here.
+//                            }
+//                        });
 
         initialize();
         if (callingIntent != null)
@@ -288,7 +314,7 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
     public void onPlaceClicked(int position, View v) {
         analyticsTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(LOG_TAG)
-                .setAction(getString(R.string.place_clicked))
+                .setAction(getString(R.string.analytics_place_clicked))
                 .setLabel(places.get(position).getName())
                 .build());
         Intent i = new Intent(this, PlaceViewActivity.class);
@@ -423,6 +449,19 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
                 analyticsTracker.send(new HitBuilders.EventBuilder()
                         .setCategory(LOG_TAG)
                         .setAction(getString(R.string.analytics_draweritem_clicked))
+                        .setLabel(getString(R.string.nav_item_share))
+                        .build());
+                Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+                        .setMessage(getString(R.string.invitation_message))
+                        .setCustomImage(Uri.parse(getString(R.string.invitation_custom_image)))
+                        .build();
+                startActivityForResult(intent, Constants.REQUEST_CODE_INVITE);
+
+                break;
+            case 3:
+                analyticsTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(LOG_TAG)
+                        .setAction(getString(R.string.analytics_draweritem_clicked))
                         .setLabel(getString(R.string.title_suggest_place))
                         .build());
                 i = new Intent(this, SuggestNewPlaceActivity.class);
@@ -440,6 +479,11 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
 
     private void refreshPlaces() {
         getPlaces();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     public class GetPlacesAsyncTask extends AsyncTask<Void, Void, String> {
@@ -680,6 +724,19 @@ public class PlacesListActivity extends AppCompatActivity implements ActivityCom
             case Constants.REQUEST_CODE_INTENT_NETWORK_SETTINGS:
                 getPlaces();
                 break;
+            case Constants.REQUEST_CODE_INVITE:
+                if (resultCode == RESULT_OK) {
+                    // Check how many invitations were sent and log a message
+                    // The ids array contains the unique invitation ids for each invitation sent
+                    // (one for each contact select by the user). You can use these for analytics
+                    // as the ID will be consistent on the sending and receiving devices.
+                    String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
+                    // Log.d(LOG_TAG, getString(R.string.sent_invitations_fmt, ids.length));
+                } else {
+                    // Sending failed or it was canceled, show failure message to the user
+
+                }
         }
     }
 }
+

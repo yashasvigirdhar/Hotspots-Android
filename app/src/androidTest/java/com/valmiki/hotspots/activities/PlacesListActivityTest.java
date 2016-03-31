@@ -72,7 +72,7 @@ public class PlacesListActivityTest {
         pressBack();
         onView(withId(R.id.ll_toolbarPlacesList)).check(matches(isDisplayed()));
         onView(withId(R.id.drawer_layout_places_list)).perform(DrawerActions.open());
-        onView(withId(R.id.drawerList)).perform(RecyclerViewActions.actionOnItemAtPosition(2, click()));
+        onView(withId(R.id.drawerList)).perform(RecyclerViewActions.actionOnItemAtPosition(3, click()));
         pressBack();
     }
 

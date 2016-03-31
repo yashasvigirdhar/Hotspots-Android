@@ -185,7 +185,7 @@ public class CitySelectionActivity extends AppCompatActivity implements CitiesRe
         String city = places.get(position).getName();
         analyticsTracker.send(new HitBuilders.EventBuilder()
                 .setCategory(LOG_TAG)
-                .setAction(getString(R.string.city_clicked))
+                .setAction(getString(R.string.analytics_city_clicked))
                 .setLabel(city)
                 .build());
 

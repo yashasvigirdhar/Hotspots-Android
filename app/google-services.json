@@ -29,7 +29,7 @@
           "apns_config": []
         },
         "appinvite_service": {
-          "status": 1,
+          "status": 2,
           "other_platform_oauth_client": []
         },
         "google_signin_service": {

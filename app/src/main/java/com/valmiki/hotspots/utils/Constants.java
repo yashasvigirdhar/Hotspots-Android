@@ -18,6 +18,8 @@ public class Constants {
 
     final public static int REQUEST_CODE_INTENT_NETWORK_SETTINGS = 5;
 
+    final public static int REQUEST_CODE_INVITE = 6;
+
     // The minimum distance to change updates in metters
     public static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
 
@@ -43,6 +45,7 @@ public class Constants {
 
     public static final String IMAGE_SHARE_TEXT = "Hey ! Have a look at this awesome picture of a place called %s. If you want " +
             "other information about the place download this app from play store : " + "https://play.google.com/store/apps/details?id=com.valmiki.hotspots";
+
 
     public static int gpsPermissionDenied = 0;
 
