@@ -2,5 +2,5 @@ Hotspots aims to provide you an extremely easy way to discover places in a city 
 
 This is the android client for hotspots.
 
-For any concerns,
-contact valmikilabs@gmail.com
+Disclaimer:
+This app was built in 2016 so might contain a lot of deprecated android components. 
