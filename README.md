@@ -3,7 +3,7 @@ Hotspots aims to provide you an extremely easy way to discover places in a city 
 
 This is the android client for hotspots.
 
-Update:
+## Update:
 
 I've taken down the app from play store and it's no longer in active development.
 
